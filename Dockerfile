@@ -4,7 +4,7 @@ WORKDIR /app
 COPY * ./
 RUN go mod download
 
-RUN go build ./cmd/arexAnalysis.go -o /arexAnalysis
+RUN go build ./cmd/arexAnalysis.go -o ./arexanalysis
 
 EXPOSE 8090
-CMD [ "/arexAnalysis" ]
+CMD [ "./arexanalysis" ]
