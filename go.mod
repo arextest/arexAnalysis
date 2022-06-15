@@ -1,4 +1,4 @@
-module local/arex-reporter
+module github.com/arextest/arexAnalysis
 
 go 1.18
 
