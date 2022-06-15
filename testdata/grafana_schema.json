@@ -1,0 +1,342 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "integer"
+    },
+    "dashboardId": {
+      "type": "integer"
+    },
+    "isAiAlert": {
+      "type": "boolean"
+    },
+    "dashboardUid": {
+      "type": "string"
+    },
+    "dashboardSlug": {
+      "type": "string"
+    },
+    "panelId": {
+      "type": "integer"
+    },
+    "name": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "newStateDate": {
+      "type": "string"
+    },
+    "evalDate": {
+      "type": "string"
+    },
+    "evalData": {
+      "type": "null"
+    },
+    "executionError": {
+      "type": "string"
+    },
+    "settings": {
+      "type": "object",
+      "properties": {
+        "appid": {
+          "type": "string"
+        },
+        "conditions": {
+          "type": "array",
+          "items": [
+            {
+              "type": "object",
+              "properties": {
+                "evaluator": {
+                  "type": "object",
+                  "properties": {
+                    "alertLevel": {
+                      "type": "string"
+                    },
+                    "params": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "integer"
+                        }
+                      ]
+                    },
+                    "timeRange": {
+                      "type": "array",
+                      "items": {}
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["alertLevel", "params", "timeRange", "type"]
+                },
+                "operator": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["type"]
+                },
+                "query": {
+                  "type": "object",
+                  "properties": {
+                    "datasourceId": {
+                      "type": "integer"
+                    },
+                    "datasourceName": {
+                      "type": "string"
+                    },
+                    "datasourceType": {
+                      "type": "string"
+                    },
+                    "model": {
+                      "type": "object",
+                      "properties": {
+                        "alertQuery": {
+                          "type": "string"
+                        },
+                        "database": {
+                          "type": "string"
+                        },
+                        "dateLoading": {
+                          "type": "boolean"
+                        },
+                        "dateTimeColDataType": {
+                          "type": "string"
+                        },
+                        "dateTimeType": {
+                          "type": "string"
+                        },
+                        "datetimeLoading": {
+                          "type": "boolean"
+                        },
+                        "disableSliceReq": {
+                          "type": "boolean"
+                        },
+                        "fillNullPoint": {
+                          "type": "boolean"
+                        },
+                        "format": {
+                          "type": "string"
+                        },
+                        "formattedQuery": {
+                          "type": "string"
+                        },
+                        "interval": {
+                          "type": "string"
+                        },
+                        "intervalFactor": {
+                          "type": "integer"
+                        },
+                        "query": {
+                          "type": "string"
+                        },
+                        "rawQuery": {
+                          "type": "string"
+                        },
+                        "refId": {
+                          "type": "string"
+                        },
+                        "round": {
+                          "type": "string"
+                        },
+                        "table": {
+                          "type": "string"
+                        },
+                        "tableLoading": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "alertQuery",
+                        "database",
+                        "dateLoading",
+                        "dateTimeColDataType",
+                        "dateTimeType",
+                        "datetimeLoading",
+                        "disableSliceReq",
+                        "fillNullPoint",
+                        "format",
+                        "formattedQuery",
+                        "interval",
+                        "intervalFactor",
+                        "query",
+                        "rawQuery",
+                        "refId",
+                        "round",
+                        "table",
+                        "tableLoading"
+                      ]
+                    },
+                    "params": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "datasourceId",
+                    "datasourceName",
+                    "datasourceType",
+                    "model",
+                    "params"
+                  ]
+                },
+                "reducer": {
+                  "type": "object",
+                  "properties": {
+                    "params": {
+                      "type": "array",
+                      "items": {}
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["params", "type"]
+                },
+                "type": {
+                  "type": "string"
+                }
+              },
+              "required": ["evaluator", "operator", "query", "reducer", "type"]
+            }
+          ]
+        },
+        "datasourceName": {
+          "type": "string"
+        },
+        "emailGroups": {
+          "type": "array",
+          "items": {}
+        },
+        "executionErrorState": {
+          "type": "string"
+        },
+        "for": {
+          "type": "string"
+        },
+        "frequency": {
+          "type": "string"
+        },
+        "handler": {
+          "type": "integer"
+        },
+        "level": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "noDataState": {
+          "type": "string"
+        },
+        "notifications": {
+          "type": "array",
+          "items": {}
+        },
+        "notificationsV2": {
+          "type": "array",
+          "items": [
+            {
+              "type": "object",
+              "properties": {
+                "emailGroups": {
+                  "type": "array",
+                  "items": {}
+                },
+                "isDefault": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "notifications": {
+                  "type": "array",
+                  "items": {}
+                },
+                "oncall": {
+                  "type": "object"
+                },
+                "sendOwnerAdmin": {
+                  "type": "boolean"
+                },
+                "splitNotice": {
+                  "type": "boolean"
+                },
+                "users": {
+                  "type": "array",
+                  "items": {}
+                }
+              },
+              "required": [
+                "emailGroups",
+                "isDefault",
+                "message",
+                "notifications",
+                "oncall",
+                "sendOwnerAdmin",
+                "splitNotice",
+                "users"
+              ]
+            }
+          ]
+        },
+        "users": {
+          "type": "array",
+          "items": {}
+        }
+      },
+      "required": [
+        "appid",
+        "conditions",
+        "datasourceName",
+        "emailGroups",
+        "executionErrorState",
+        "for",
+        "frequency",
+        "handler",
+        "level",
+        "name",
+        "noDataState",
+        "notifications",
+        "notificationsV2",
+        "users"
+      ]
+    },
+    "url": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "dashboardId",
+    "isAiAlert",
+    "dashboardUid",
+    "dashboardSlug",
+    "panelId",
+    "name",
+    "state",
+    "newStateDate",
+    "evalDate",
+    "evalData",
+    "executionError",
+    "settings",
+    "url"
+  ]
+}

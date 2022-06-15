@@ -1,0 +1,19 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "required": [
+        "panelId",
+        "state"
+    ],
+    "properties": {
+        "panelId": {
+            "type": "array",
+            "items": {
+                "type": "number"
+            }
+        },
+        "state": {
+            "type": "array"
+        }
+    }
+}

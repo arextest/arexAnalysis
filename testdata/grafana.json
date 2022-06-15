@@ -1,0 +1,85 @@
+{
+  "id": 23029,
+  "dashboardId": 71866,
+  "isAiAlert": false,
+  "dashboardUid": "luuI2O2nk",
+  "dashboardSlug": "nocguan-xin-de-kuang-jia-zhi-biao-gong-you-yun",
+  "panelId": 18,
+  "name": " 100020816 FRAAWS Gateway非200请求量 alert",
+  "state": "ok",
+  "newStateDate": "2021-12-29T18:05:20+08:00",
+  "evalDate": "0001-01-01T00:00:00Z",
+  "evalData": null,
+  "executionError": "",
+  "settings": {
+    "appid": "100020816",
+    "conditions": [
+      {
+        "evaluator": {
+          "alertLevel": "P2",
+          "params": [5000],
+          "timeRange": [],
+          "type": "gt"
+        },
+        "operator": {
+          "type": "and"
+        },
+        "query": {
+          "datasourceId": 259,
+          "datasourceName": "Fra-Clickhouse-log",
+          "datasourceType": "hi-clickhouse-datasource",
+          "model": {
+            "alertQuery": "/*TRACE_BOF --username=cc陈呈(IT) --tableName=log.fx_gateway_aws_log_all --source=grafana --dashboardId=71866 --panelId=18 --url=http://hickwall.ctripcorp.com/grafanav2/d/luuI2O2nk/nocguan-xin-de-kuang-jia-zhi-biao-gong-you-yun TRACE_EOF*/SELECT     toUInt32(toStartOfMinute(timestamp)) * 1000 as t,     responseStatus,     count() FROM log.fx_gateway_aws_log_all WHERE $timeFilter and responseStatus != '200' GROUP BY responseStatus, t ORDER BY t",
+            "database": "log",
+            "dateLoading": false,
+            "dateTimeColDataType": "timestamp",
+            "dateTimeType": "DATETIME",
+            "datetimeLoading": false,
+            "disableSliceReq": false,
+            "fillNullPoint": false,
+            "format": "time_series",
+            "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $timeFilter GROUP BY t ORDER BY t",
+            "interval": "60s",
+            "intervalFactor": 1,
+            "query": "SELECT\n    $timeSeries as t,\n    responseStatus,\n    count()\nFROM $table\nWHERE $timeFilter and responseStatus != '200'\nGROUP BY responseStatus, t\nORDER BY t",
+            "rawQuery": "/*TRACE_BOF --username=cc陈呈(IT) --tableName=log.fx_gateway_aws_log_all --source=grafana --dashboardId=71866 --panelId=18 --url=http://hickwall.ctripcorp.com/grafanav2/d/luuI2O2nk/nocguan-xin-de-kuang-jia-zhi-biao-gong-you-yun TRACE_EOF*/SELECT     toUInt32(toStartOfMinute(timestamp)) * 1000 as t,     responseStatus,     count() FROM log.fx_gateway_aws_log_all WHERE timestamp \u003e= toDateTime(1647813600) AND timestamp \u003c toDateTime(1647834900) and responseStatus != '200' GROUP BY responseStatus, t ORDER BY t",
+            "refId": "A",
+            "round": "60s",
+            "table": "fx_gateway_aws_log_all",
+            "tableLoading": false
+          },
+          "params": ["A", "5m", "now"]
+        },
+        "reducer": {
+          "params": [],
+          "type": "avg"
+        },
+        "type": "query"
+      }
+    ],
+    "datasourceName": "Fra-Clickhouse-log",
+    "emailGroups": [],
+    "executionErrorState": "keep_state",
+    "for": "5m",
+    "frequency": "1m",
+    "handler": 1,
+    "level": "P0",
+    "name": " 100020816 FRAAWS Gateway非200请求量 alert",
+    "noDataState": "ok",
+    "notifications": [],
+    "notificationsV2": [
+      {
+        "emailGroups": [],
+        "isDefault": true,
+        "message": "100020816 FRAAWS Gateway非200请求量 alert \u003e 5000",
+        "notifications": [],
+        "oncall": {},
+        "sendOwnerAdmin": true,
+        "splitNotice": false,
+        "users": []
+      }
+    ],
+    "users": []
+  },
+  "url": "/grafanav2/d/luuI2O2nk/nocguan-xin-de-kuang-jia-zhi-biao-gong-you-yun"
+}

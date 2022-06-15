@@ -1,0 +1,96 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "integer"
+    },
+    "dashboardId": {
+      "type": "integer"
+    },
+    "isAiAlert": {
+      "type": "boolean"
+    },
+    "dashboardUid": {
+      "type": "string"
+    },
+    "dashboardSlug": {
+      "type": "string"
+    },
+    "panelId": {
+      "type": "array",
+      "items": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "integer"
+        }
+      ]
+    },
+    "name": {
+      "type": "string"
+    },
+    "state": {
+      "type": "array",
+      "items": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "newStateDate": {
+      "type": "string"
+    },
+    "evalDate": {
+      "type": "string"
+    },
+    "evalData": {
+      "type": "null"
+    },
+    "executionError": {
+      "type": "string"
+    },
+    "settings": {
+      "type": "array",
+      "items": [
+        {
+          "type": "object",
+          "properties": {
+            "appid": {
+              "type": "string"
+            }
+          },
+          "required": ["appid"]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "appid": {
+              "type": "string"
+            }
+          },
+          "required": ["appid"]
+        }
+      ]
+    }
+  },
+  "required": [
+    "id",
+    "dashboardId",
+    "isAiAlert",
+    "dashboardUid",
+    "dashboardSlug",
+    "panelId",
+    "name",
+    "state",
+    "newStateDate",
+    "evalDate",
+    "evalData",
+    "executionError",
+    "settings"
+  ]
+}
