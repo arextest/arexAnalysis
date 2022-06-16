@@ -3,10 +3,11 @@ package jsonschema_test
 import (
 	"encoding/json"
 	"fmt"
-	"local/arex-reporter/jsonschema"
 	"log"
 	"strconv"
 	"strings"
+
+	"github.com/arextest/arexAnalysis/jsonschema"
 )
 
 var powerOfMeta = jsonschema.MustCompileString("powerOf.json", `{

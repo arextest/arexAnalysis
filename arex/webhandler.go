@@ -4,11 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"io/ioutil"
-	"local/arex-reporter/jsonschema"
 	"net/http"
 	"strconv"
 	"time"
 
+	"github.com/arextest/arexAnalysis/jsonschema"
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,6 +18,7 @@ func InstallHandler(engine *gin.Engine) {
 	engine.GET("/schema/:key", middleware, getSchemaByKey)
 	engine.POST("/schema/:key", middleware, postSchema)
 	engine.PUT("/schema/:key", middleware, putSchema)
+	engine.PATCH("/schema/:key", middleware, patchSchema)
 	engine.DELETE("/schema/:key", middleware, deleteSchema)
 
 	engine.GET("/validation/:key", middleware, getValidation)
@@ -131,6 +132,32 @@ func putSchema(c *gin.Context) {
 	ss.Schema = string(storeData)
 	saveSchema(context.Background(), ss)
 	c.IndentedJSON(http.StatusAccepted, res.Document)
+}
+
+func patchSchema(c *gin.Context) {
+	key := c.Param("key")
+
+	jsonData, err := ioutil.ReadAll(c.Request.Body)
+	if err != nil {
+		c.IndentedJSON(http.StatusExpectationFailed, gin.H{"message": "put failed:" + err.Error()})
+		return
+	}
+
+	oldSchema := querySchema(context.Background(), key)
+	newschema, err := serviceUpdateSchema(oldSchema.Schema, jsonData)
+	if err != nil {
+		c.IndentedJSON(http.StatusConflict, gin.H{"message": "schema marshal error"})
+	}
+
+	var ss schemaStore
+	ss.Key = key
+	storeData, err := json.Marshal(newschema)
+	if err != nil {
+		c.IndentedJSON(http.StatusConflict, gin.H{"message": "schema marshal error"})
+	}
+	ss.Schema = string(storeData)
+	saveSchema(context.Background(), ss)
+	c.IndentedJSON(http.StatusAccepted, newschema)
 }
 
 func deleteSchema(c *gin.Context) {

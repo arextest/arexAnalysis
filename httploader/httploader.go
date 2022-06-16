@@ -11,8 +11,9 @@ package httploader
 import (
 	"fmt"
 	"io"
-	"local/arex-reporter/jsonschema"
 	"net/http"
+
+	"github.com/arextest/arexAnalysis/jsonschema"
 )
 
 // Client is the default HTTP Client used to Get the resource.

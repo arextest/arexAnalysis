@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"local/arex-reporter/comparer"
-	"local/arex-reporter/jsonschema"
+
+	"github.com/arextest/arexAnalysis/comparer"
+	"github.com/arextest/arexAnalysis/jsonschema"
 )
 
 // serviceGenerateSchema input: json output: json-schema
@@ -51,33 +52,32 @@ func serviceValidateJSONBySchema(dataSchema string, data string) (bool, error) {
 }
 
 // serviceUpdateSchema update schema by new json return new schema
-func serviceUpdateSchema(jsonSchema string, args ...string) (string, error) {
+func serviceUpdateSchema(jsonSchema string, beMegered []byte) (interface{}, error) {
 	if jsonSchema == "" {
 		return "", errors.New("empty schema")
 	}
 	var schema jsonschema.SchemaDocument
 	json.Unmarshal([]byte(jsonSchema), &schema)
-	schemaChan := make(chan jsonschema.SchemaDocument, len(args))
-	for _, arg := range args {
-		go func(jsonData *string) {
-			res, err := jsonschema.SchemaGenerateGo(*jsonData, "")
-			if err != nil {
-				fmt.Printf("error %v\n", err)
-				return
-			}
-			schemaChan <- *res.Document
-		}(&arg)
-	}
-
-	for oneschema := range schemaChan {
-		err := schema.MergeSchemaDocument(&oneschema)
+	schemaChan := make(chan *jsonschema.SchemaDocument)
+	go func(jsonData []byte) {
+		mapJSON := make(map[string]interface{})
+		json.Unmarshal(jsonData, &mapJSON)
+		res, err := jsonschema.SchemaGenerateGo(mapJSON, "")
 		if err != nil {
 			fmt.Printf("error %v\n", err)
+			return
 		}
+		schemaChan <- res.Document
+	}(beMegered)
+
+	oneschema := <-schemaChan
+	err := schema.MergeSchemaDocument(oneschema)
+	if err != nil {
+		fmt.Printf("error %v\n", err)
 	}
 	close(schemaChan)
 
-	return schema.String()
+	return schema, nil
 }
 
 // serviceDiff2JSON compare 2 json and return json result

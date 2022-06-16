@@ -7,10 +7,11 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"local/arex-reporter/jsonschema"
 	"log"
 	"strconv"
 	"strings"
+
+	"github.com/arextest/arexAnalysis/jsonschema"
 )
 
 func Example() {

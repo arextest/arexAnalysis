@@ -3,13 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
-	"local/arex-reporter/arex"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
+	"github.com/arextest/arexAnalysis/arex"
 	"github.com/gin-gonic/gin"
 	"github.com/oklog/run"
 	"github.com/prometheus/client_golang/prometheus/promhttp"

@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"io/fs"
 	"io/ioutil"
-	"local/arex-reporter/comparer"
 	"log"
 	"testing"
+
+	"github.com/arextest/arexAnalysis/comparer"
 )
 
 func Test_gojson(t *testing.T) {
