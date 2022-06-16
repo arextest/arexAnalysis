@@ -1,7 +1,7 @@
 FROM golang:1.18
 
 WORKDIR /app
-ADD ./* ./
+ADD . ./
 RUN go mod download
 RUN go build ./cmd/arexAnalysis.go
 
