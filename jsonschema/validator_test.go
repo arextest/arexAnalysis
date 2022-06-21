@@ -7,7 +7,6 @@ import (
 	"errors"
 	"io"
 	"io/ioutil"
-	"local/arex-reporter/jsonschema"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -17,6 +16,8 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+
+	"github.com/arextest/arexAnalysis/jsonschema"
 )
 
 var testSuite = "testdata/JSON-Schema-Test-Suite@3fcee38"

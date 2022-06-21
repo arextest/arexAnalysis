@@ -12,13 +12,13 @@ import (
 )
 
 func Test_gojson(t *testing.T) {
-	sch, err := Compile("../testdata/grafana_schema_2.json")
+	sch, err := Compile("../testdata/grafana_schema_1.json")
 	if err != nil {
 		fmt.Printf("%#v", err)
 		log.Fatalf("%#v", err)
 	}
 
-	data, err := ioutil.ReadFile("../testdata/grafana.json")
+	data, err := ioutil.ReadFile("../testdata/grafana1.json")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -65,23 +65,41 @@ func Test_GenerateCase(t *testing.T) {
 
 }
 
+func Test_ErrorSchema(test *testing.T) {
+	data, _ := ioutil.ReadFile("../testdata/customer1.json")
+	schemaDoc, err := GenerateSchemaDataModel(data, "Grafana")
+	if err != nil {
+		test.FailNow()
+		return
+	}
+
+	schemaText, err := schemaDoc.Document.String()
+	if err != nil {
+		test.Failed()
+		return
+	}
+	// fmt.Printf("json-Schema:\n%v\n", schemaText)
+	ioutil.WriteFile("../testdata/customer1_schema.json", []byte(schemaText), fs.ModePerm)
+}
+
 func Test_GenerateSchema(test *testing.T) {
 	data, err := ioutil.ReadFile("../testdata/grafana.json")
 	if err != nil {
-		log.Fatal(err)
+		test.FailNow()
 	}
 
-	f, err := ParseJson(data)
+	schemaDoc, err := GenerateSchemaDataModel(data, "Grafana")
 	if err != nil {
-		log.Fatal(err)
-	}
-	schemaDoc, _ := SchemaGenerateGo(f, "Grafana")
-	schemaText, err := schemaDoc.Document.String()
-	if err != nil {
-		fmt.Printf("%v", err)
+		test.FailNow()
 		return
 	}
-	fmt.Printf("json-Schema:\n%v\n", schemaText)
+
+	schemaText, err := schemaDoc.Document.String()
+	if err != nil {
+		test.Failed()
+		return
+	}
+	// fmt.Printf("json-Schema:\n%v\n", schemaText)
 	ioutil.WriteFile("../testdata/grafana_schema_1.json", []byte(schemaText), fs.ModePerm)
 }
 

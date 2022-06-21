@@ -3,6 +3,7 @@ package arex
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -177,34 +178,39 @@ type validation struct {
 	Result string `json:"result"`
 }
 
+// input key, jsonData
 func getValidation(c *gin.Context) {
 	key := c.Param("key")
 	if key == "" {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "schema key cannot be empty"})
 		return
 	}
-	ss := querySchema(context.Background(), key)
-	data := ss.Schema
-	var sd jsonschema.SchemaDocument
-	err := json.Unmarshal([]byte(data), &sd)
-	if err != nil {
-		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "json struct error"})
-		return
-	}
+
 	jsonData, err := ioutil.ReadAll(c.Request.Body)
-	ok, err := serviceValidateJSONBySchema(string(data), string(jsonData))
 	if err != nil {
 		c.IndentedJSON(http.StatusExpectationFailed, gin.H{"message": "validation failed." + err.Error()})
 		return
 	}
 
-	if !ok {
-		c.IndentedJSON(http.StatusExpectationFailed, gin.H{"message": "validation not ok."})
+	msg, err := validateSchema(key, jsonData)
+	if err != nil {
+		c.IndentedJSON(http.StatusExpectationFailed, gin.H{"message": "validation not ok:" + err.Error()})
 		return
 	}
-
-	c.IndentedJSON(http.StatusAccepted, gin.H{"message": "success"})
+	c.IndentedJSON(http.StatusAccepted, gin.H{"message": msg})
 	return
+}
+
+func validateSchema(key string, jsonData []byte) (string, error) {
+	ss := querySchema(context.Background(), key)
+	data := ss.Schema
+	var sd jsonschema.SchemaDocument
+	err := json.Unmarshal([]byte(data), &sd)
+	if err != nil {
+		return "", errors.New("json struct error")
+	}
+
+	return serviceValidateJSONBySchema(string(data), string(jsonData))
 }
 
 func postValidation(c *gin.Context) {
@@ -237,18 +243,13 @@ func postValidation(c *gin.Context) {
 		schemaText = valid.Schema
 	}
 
-	ok, err := serviceValidateJSONBySchema(schemaText, valid.Input)
+	msg, err := serviceValidateJSONBySchema(schemaText, valid.Input)
 	if err != nil {
 		c.IndentedJSON(http.StatusExpectationFailed, gin.H{"message": "validation failed." + err.Error()})
 		return
 	}
 
-	if !ok {
-		c.IndentedJSON(http.StatusExpectationFailed, gin.H{"message": "validation not ok."})
-		return
-	}
-
-	c.IndentedJSON(http.StatusAccepted, gin.H{"message": "success"})
+	c.IndentedJSON(http.StatusAccepted, gin.H{"message": msg})
 	return
 }
 

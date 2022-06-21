@@ -10,18 +10,8 @@ import (
 )
 
 // serviceGenerateSchema input: json output: json-schema
-func serviceGenerateSchema(data interface{}) (*jsonschema.SchemaModel, error) {
-	f, err := jsonschema.ParseJson(data.([]byte))
-	if err != nil {
-		fmt.Printf("%v", err)
-		return nil, err
-	}
-	schemaDoc, _ := jsonschema.SchemaGenerateGo(f, "")
-	// schemaText, err := schemaDoc.Document.String()
-	// if err != nil {
-	// 	fmt.Printf("%v", err)
-	// 	return "", err
-	// }
+func serviceGenerateSchema(data []byte) (*jsonschema.SchemaDataModel, error) {
+	schemaDoc, _ := jsonschema.GenerateSchemaDataModel(data, "")
 	return schemaDoc, nil
 }
 
@@ -36,33 +26,37 @@ func serviceValidate2Schema(schemaX string, schemaY string) (bool, error) {
 }
 
 // serviceValidateJSONBySchema valid json by schema
-func serviceValidateJSONBySchema(dataSchema string, data string) (bool, error) {
+func serviceValidateJSONBySchema(dataSchema string, data string) (string, error) {
 	schema, err := jsonschema.CompileString("jason-schema", dataSchema)
 	if err != nil {
-		return false, err
+		return "schama compiled failed.", err
 	}
 	var someInterface interface{}
 	json.Unmarshal([]byte(data), &someInterface)
 
 	err = schema.Validate(someInterface)
-	if err == nil {
-		return true, nil
+	switch err.(type) {
+	case *jsonschema.ValidationError:
+		return fmt.Sprintf("%#v", err), err
+	case jsonschema.InfiniteLoopError:
+		return fmt.Sprintf("%#v", err), err
+	case jsonschema.InvalidJSONTypeError:
+		return fmt.Sprintf("%#v", err), err
+	default:
+		return "success", nil
 	}
-	return false, err
 }
 
 // serviceUpdateSchema update schema by new json return new schema
-func serviceUpdateSchema(jsonSchema string, beMegered []byte) (interface{}, error) {
+func serviceUpdateSchema(jsonSchema string, beMegered []byte) (*jsonschema.SchemaDocument, error) {
 	if jsonSchema == "" {
-		return "", errors.New("empty schema")
+		return nil, errors.New("empty schema")
 	}
 	var schema jsonschema.SchemaDocument
 	json.Unmarshal([]byte(jsonSchema), &schema)
 	schemaChan := make(chan *jsonschema.SchemaDocument)
 	go func(jsonData []byte) {
-		mapJSON := make(map[string]interface{})
-		json.Unmarshal(jsonData, &mapJSON)
-		res, err := jsonschema.SchemaGenerateGo(mapJSON, "")
+		res, err := jsonschema.GenerateSchemaDataModel(jsonData, "")
 		if err != nil {
 			fmt.Printf("error %v\n", err)
 			return
@@ -77,7 +71,7 @@ func serviceUpdateSchema(jsonSchema string, beMegered []byte) (interface{}, erro
 	}
 	close(schemaChan)
 
-	return schema, nil
+	return &schema, nil
 }
 
 // serviceDiff2JSON compare 2 json and return json result

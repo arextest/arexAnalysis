@@ -77,16 +77,9 @@ func querySchema(ctx context.Context, key string) *schemaStore {
 	filter := bson.M{"key": key}
 	var result bson.M
 	scs.FindOne(ctx, filter).Decode(&result)
-	// cursor, err := scs.Find(ctx, filter, nil)
-	// if err != nil {
-	// 	return nil
-	// }
-	// defer cursor.Close(ctx)
-
-	// var results []bson.M
-	// if err = cursor.All(context.TODO(), &results); err != nil {
-	// 	return nil
-	// }
+	if result == nil {
+		return nil
+	}
 	bsonBytes, _ := bson.Marshal(result)
 	err := bson.Unmarshal(bsonBytes, &schema)
 	if err != nil {

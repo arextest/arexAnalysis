@@ -1,9 +1,10 @@
 package jsonschema_test
 
 import (
-	"local/arex-reporter/jsonschema"
 	"strings"
 	"testing"
+
+	"github.com/arextest/arexAnalysis/jsonschema"
 )
 
 func TestPowerOfExt(t *testing.T) {

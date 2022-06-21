@@ -185,7 +185,7 @@ func (m *Model) parse(data interface{}, k string) {
 	switch vv := data.(type) {
 	case string:
 		if m.Convert {
-			t, converted := parseStringType(vv)
+			t, converted := parseStringFormat(vv)
 			m.printType(k, vv, t, converted)
 		} else {
 			m.printType(k, vv, "string", false)
@@ -287,7 +287,8 @@ func (m *Model) parseMapJava(ms map[string]interface{}) ([]map[string]interface{
 	return data, names
 }
 
-func parseStringType(value string) (string, bool) {
+// parseStringFormat check string to sub type(区分各类的字符串)
+func parseStringFormat(value string) (string, bool) {
 	if _, err := time.Parse(time.RFC3339, value); err == nil {
 		return "time.Time", true
 	} else if ip := net.ParseIP(value); ip != nil {

@@ -1,34 +1,35 @@
 package jsonschema
 
 import (
+	"errors"
 	"fmt"
 )
 
-// SchemaModel add reader
-type SchemaModel struct {
+// SchemaDataModel add reader
+type SchemaDataModel struct {
 	// Writer      io.Writer
 	WithExample bool
-	Data        interface{}
+	Data        []byte
 	Name        string
 	Format      bool
 	Convert     bool
 	Document    *SchemaDocument
 }
 
-// NewSchemaModel create schema model
-func NewSchemaModel(data interface{}, name string) *SchemaModel {
-	if name == "" {
-		name = "Data"
+// NewSchemaDataModel create schema model
+func NewSchemaDataModel(data []byte, modelName string) *SchemaDataModel {
+	if modelName == "" {
+		modelName = "Data"
 	}
-	name = replaceName(name)
+	modelName = replaceName(modelName)
 
 	var version = 2020
 	_, textSchema := readDraft(version)
-	return &SchemaModel{
+	return &SchemaDataModel{
 		// Writer:      os.Stdout,
 		WithExample: true,
 		Data:        data,
-		Name:        name,
+		Name:        modelName,
 		Format:      true,
 		Convert:     true,
 		Document: &SchemaDocument{
@@ -37,55 +38,64 @@ func NewSchemaModel(data interface{}, name string) *SchemaModel {
 	}
 }
 
-// SchemaFromBytes create instacne
-func SchemaFromBytes(bytes []byte, name string) (*SchemaModel, error) {
-	f, err := ParseJson(bytes)
-	if err != nil {
-		return nil, err
-	}
-	return NewSchemaModel(f, name), nil
-}
-
 // SchemaGetModel from bytes
-func SchemaGetModel(url string) (*SchemaModel, error) {
+func SchemaGetModel(url string) (*SchemaDataModel, error) {
 	b, name, err := Get(url)
 	if err != nil {
 		return nil, err
 	}
-	return SchemaFromBytes(b, name)
+	return NewSchemaDataModel(b, name), nil
 }
 
-// SchemaGenerateGo use json to generate schema
+// GenerateSchemaDataModel use json to generate schema
 // root entry
-func SchemaGenerateGo(f interface{}, name string) (*SchemaModel, error) {
-	m := NewSchemaModel(f, name)
-	m.GenerateSchema()
-	return m, nil
+func GenerateSchemaDataModel(f []byte, name string) (*SchemaDataModel, error) {
+	m := NewSchemaDataModel(f, name)
+	err := m.generate()
+	return m, err
 }
 
-// GenerateSchema todo
-func (m *SchemaModel) GenerateSchema() {
-	fu := func(ms map[string]interface{}, p *property) { m.parseMap(ms, p) }
-	m.generate(fu)
-}
-
-// json root 是数组的话,就取第一个; 不是的话,就是全部
-// 当跟节点是[],怎么处理
-func (m *SchemaModel) generate(fu func(map[string]interface{}, *property)) {
-	var ma map[string]interface{}
-	switch v := m.Data.(type) {
-	case []interface{}:
-		ma = v[0].(map[string]interface{})
-	default:
-		ma = m.Data.(map[string]interface{})
+func (m *SchemaDataModel) generate() error {
+	if m.Data == nil {
+		return errors.New("data is empty")
 	}
-	fu(ma, &m.Document.property)
+
+	jsonData, err := ParseJson(m.Data)
+	if err != nil {
+		return err
+	}
+
+	return m.parse(jsonData, "", &m.Document.property)
 }
 
-// 解析json的根,或者解析节点是map的节点
-func (m *SchemaModel) parseMap(ms map[string]interface{}, p *property) {
+// pase object.
+func (m *SchemaDataModel) parse(data interface{}, keyName string, p *property) error {
+	switch vv := data.(type) {
+	case string:
+		m.parseString(vv, keyName, p)
+	case bool:
+		m.parseBool(vv, keyName, p)
+	case float64:
+		m.parseNumber(vv, keyName, p)
+	case int64:
+		m.parseInteger(vv, keyName, p)
+	case []interface{}:
+		m.parseArray(vv, keyName, p)
+	case map[string]interface{}:
+		m.parseMap(vv, keyName, p)
+	case nil:
+		m.parseNull(keyName, p)
+	default:
+		return fmt.Errorf("unknown type: %T", vv)
+	}
+	return nil
+}
+
+// Parse map struct such as json root or json node
+func (m *SchemaDataModel) parseMap(ms map[string]interface{}, keyName string, p *property) {
 	p.Type = "object"
 	p.Properties = make(map[string]*property, 0)
+
 	keys := getSortedKeys(ms)
 	for _, k := range keys {
 		tempP := &property{}
@@ -95,103 +105,59 @@ func (m *SchemaModel) parseMap(ms map[string]interface{}, p *property) {
 	}
 }
 
-// data是节点, keyName是节点名,p是传入的可以供当前使用的property
-func (m *SchemaModel) parse(data interface{}, keyName string, p *property) {
-	switch vv := data.(type) {
-	case string:
-		subType, converted := parseStringType(vv)
-		if converted {
-			sType, sFormat := getTypeFormatByMapping(subType)
-			if sType == "" {
-				m.printType(p, keyName, vv, "string", false)
-			} else {
-				m.printTypeFormat(p, keyName, vv, sType, sFormat)
-			}
-		} else {
-			m.printType(p, keyName, vv, "string", false)
-		}
-	case bool:
-		m.printType(p, keyName, vv, "boolean", false)
-	case float64:
-		//json parser always returns a float for number values, check if it is an int value
-		m.printType(p, keyName, vv, "number", false)
-	case int64:
-		m.printType(p, keyName, vv, "integer", false)
-	case []interface{}:
-		p.Type = "array"
-		// p.Items = &property{}
+func (m *SchemaDataModel) parseInteger(vv int64, keyName string, p *property) {
+	//json parser always returns a float for number values, check if it is an int value
+	m.fillProperType(p, "integer")
+}
 
-		if len(vv) > 0 {
-			subProp := &property{}
-			p.Items = subProp
-			switch vvv := vv[0].(type) {
-			case string:
-				subType, converted := parseStringType(vvv)
-				if converted {
-					sType, sFormat := getTypeFormatByMapping(subType)
-					if sType == "" {
-						m.printType(subProp, "", vv, "string", false)
-					} else {
-						m.printTypeFormat(subProp, "", vv, sType, sFormat)
-					}
-				} else {
-					m.printType(subProp, "", vv, "string", false)
-				}
-			case float64:
-				//json parser always returns a float for number values, check if it is an int value
-				m.printType(subProp, keyName, vv, "number", false)
-			case int64:
-				m.printType(subProp, keyName, vv, "integer", false)
-			case bool:
-				m.printType(subProp, "", vv[0], "boolean", false)
-			case []interface{}:
-				subProp.Type = "array"
-				if len(data.([]interface{})) > 0 {
-					lastP := &property{}
-					subProp.Items = lastP
-					m.parse(vvv, "", lastP)
-				} else {
-					m.printType(subProp, keyName, nil, "interface{}", false)
-				}
-			case map[string]interface{}:
-				subProp.Type = "object"
-				subProp.Properties = make(map[string]*property, 0)
-				m.parseMap(vv[0].(map[string]interface{}), subProp)
-			default:
-				fmt.Printf("unknown type: %T", vvv)
-				m.printType(subProp, keyName, nil, "interface{}", false)
-			}
-		} else {
-			// empty []
+func (m *SchemaDataModel) parseNumber(vv float64, keyName string, p *property) {
+	//json parser always returns a float for number values, check if it is an int value
+	m.fillProperType(p, "number")
+}
+
+func (m *SchemaDataModel) parseBool(vv bool, keyName string, p *property) {
+	m.fillProperType(p, "boolean")
+}
+
+func (m *SchemaDataModel) parseNull(keyName string, p *property) {
+	p.Type = "null"
+	m.fillObject(p, keyName, "null")
+}
+
+func (m *SchemaDataModel) parseString(vv string, keyName string, p *property) {
+	subType, needConvert := parseStringFormat(vv)
+
+	if needConvert {
+		sType, sFormat := getTypeFormatByMapping(subType)
+		if sType != "" {
+			m.fillProperTypeFormat(p, sType, sFormat)
+			return
 		}
-	case map[string]interface{}:
-		p.Type = "object"
-		m.parseMap(vv, p)
-	case nil:
-		p.Type = "null"
-		m.printObject(p, keyName, "null")
-	default:
-		//fmt.Printf("unknown type: %T", vv)
-		m.printType(p, keyName, nil, "interface{}", false)
+	}
+	m.fillProperType(p, "string")
+}
+
+func (m *SchemaDataModel) parseArray(vv []interface{}, keyName string, p *property) {
+	p.Type = "array"
+	if len(vv) > 0 {
+		subProp := &property{}
+		p.Items = subProp
+		m.parse(vv[0], keyName, subProp)
 	}
 }
 
 // value范例值;typeText类型;
-func (m *SchemaModel) printType(p *property, keyName string, value interface{}, typeText string, converted bool) {
-	// name := replaceName(keyName)
-	if converted {
-		keyName += ",string"
-	}
+func (m *SchemaDataModel) fillProperType(p *property, typeText string) {
 	p.Type = typeText
 }
 
-func (m *SchemaModel) printTypeFormat(p *property, keyName string, value interface{}, typeText string, formatText string) {
+func (m *SchemaDataModel) fillProperTypeFormat(p *property, typeText string, formatText string) {
 	// name := replaceName(keyName)
 	p.Type = typeText
 	p.Format = formatText
 }
 
-func (m *SchemaModel) printObject(p *property, n string, t string) {
+func (m *SchemaDataModel) fillObject(p *property, n string, t string) {
 	// name := replaceName(n)
 	p.Type = t
 	// p.Format = append(p.Format, name)
