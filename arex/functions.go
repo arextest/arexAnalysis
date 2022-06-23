@@ -11,7 +11,7 @@ import (
 
 // serviceGenerateSchema input: json output: json-schema
 func serviceGenerateSchema(data []byte) (*jsonschema.SchemaDataModel, error) {
-	schemaDoc, _ := jsonschema.GenerateSchemaDataModel(data, "")
+	schemaDoc, _ := jsonschema.GenerateSchemaDataModel(data, "arex")
 	return schemaDoc, nil
 }
 
@@ -29,7 +29,7 @@ func serviceValidate2Schema(schemaX string, schemaY string) (bool, error) {
 func serviceValidateJSONBySchema(dataSchema string, data string) (string, error) {
 	schema, err := jsonschema.CompileString("jason-schema", dataSchema)
 	if err != nil {
-		return "schama compiled failed.", err
+		return "schama compiled failed:" + err.Error(), err
 	}
 	var someInterface interface{}
 	json.Unmarshal([]byte(data), &someInterface)

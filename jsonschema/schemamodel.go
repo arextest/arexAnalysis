@@ -3,6 +3,11 @@ package jsonschema
 import (
 	"errors"
 	"fmt"
+	"net"
+	"net/mail"
+	"net/url"
+	"strconv"
+	"time"
 )
 
 // SchemaDataModel add reader
@@ -107,38 +112,80 @@ func (m *SchemaDataModel) parseMap(ms map[string]interface{}, keyName string, p 
 
 func (m *SchemaDataModel) parseInteger(vv int64, keyName string, p *property) {
 	//json parser always returns a float for number values, check if it is an int value
-	m.fillProperType(p, "integer")
+	p.Type = "integer"
+	p.Maximum = float64(vv)
+	p.Minimum = float64(vv)
 }
 
 func (m *SchemaDataModel) parseNumber(vv float64, keyName string, p *property) {
 	//json parser always returns a float for number values, check if it is an int value
-	m.fillProperType(p, "number")
+	p.Type = "number"
+	p.Maximum = vv
+	p.Minimum = vv
 }
 
 func (m *SchemaDataModel) parseBool(vv bool, keyName string, p *property) {
-	m.fillProperType(p, "boolean")
+	p.Type = "boolean"
 }
 
 func (m *SchemaDataModel) parseNull(keyName string, p *property) {
 	p.Type = "null"
-	m.fillObject(p, keyName, "null")
 }
 
 func (m *SchemaDataModel) parseString(vv string, keyName string, p *property) {
-	subType, needConvert := parseStringFormat(vv)
+	fillingGeneralString := func(cv string, types string, format string, p *property) {
+		p.Type = types
+		p.Format = format
+		p.MaxLength = len(vv)
+		p.MinLength = len(vv)
 
-	if needConvert {
-		sType, sFormat := getTypeFormatByMapping(subType)
-		if sType != "" {
-			m.fillProperTypeFormat(p, sType, sFormat)
-			return
+		if p.MaxLength < constNotEnumMaxLength {
+			p.Examples = append(p.Examples, vv)
 		}
 	}
-	m.fillProperType(p, "string")
+
+	parseStringInlineFormat := func(value string) (string, string) {
+		if ok := isDate(value); ok {
+			return getTypeFormatByMapping("date")
+		} else if ok := isDateTime(value); ok {
+			return getTypeFormatByMapping("time.Time")
+		} else if _, err := time.Parse(time.RFC3339, value); err == nil {
+			return getTypeFormatByMapping("time.Time")
+		} else if ip := net.ParseIP(value); ip != nil {
+			if ip.To4() != nil {
+				return getTypeFormatByMapping("ipv4")
+			}
+			return getTypeFormatByMapping("ipv6")
+		} else if _, err := mail.ParseAddress(value); err == nil {
+			return getTypeFormatByMapping("email")
+		} else if _, err := url.Parse(value); err == nil {
+			return getTypeFormatByMapping("url")
+		} else if ok := isURI(value); ok {
+			return getTypeFormatByMapping("uri")
+		} else if ok := isURIReference(value); ok {
+			return getTypeFormatByMapping("uri-reference")
+		} else if ok := isJSONPointer(value); ok {
+			return getTypeFormatByMapping("json-pointer")
+		} else if ok := isRelativeJSONPointer(value); ok {
+			return getTypeFormatByMapping("relative-json-pointer")
+		} else if ok := isRegex(value); ok {
+			return getTypeFormatByMapping("regex")
+		} else if _, err := strconv.ParseBool(value); err == nil {
+			return "string", ""
+			// TODO return "string", "bool"=> enum("true","false")
+		} else {
+			return "string", ""
+		}
+	}
+
+	subType, format := parseStringInlineFormat(vv)
+	fillingGeneralString(vv, subType, format, p)
 }
 
 func (m *SchemaDataModel) parseArray(vv []interface{}, keyName string, p *property) {
 	p.Type = "array"
+	p.MinItems = len(vv)
+	p.MaxItems = len(vv)
 	if len(vv) > 0 {
 		subProp := &property{}
 		p.Items = subProp
@@ -146,19 +193,31 @@ func (m *SchemaDataModel) parseArray(vv []interface{}, keyName string, p *proper
 	}
 }
 
-// value范例值;typeText类型;
-func (m *SchemaDataModel) fillProperType(p *property, typeText string) {
-	p.Type = typeText
+const constNotEnumMaxLength = 20
+
+var formatMapping = map[string][]string{
+	"time":                  {"string", "time"},
+	"date":                  {"string", "date"},
+	"time.Time":             {"string", "date-time"},
+	"ipv4":                  {"string", "ipv4"},
+	"ipv6":                  {"string", "ipv6"},
+	"email":                 {"string", "email"},
+	"idn-email":             {"string", "idn-email"},
+	"hostname":              {"string", "hostname"},
+	"idn-hostname":          {"string", "idn-hostname"},
+	"uri":                   {"string", "uri"},
+	"uri-reference":         {"string", "uri-reference"},
+	"iri":                   {"string", "iri"},
+	"iri-reference":         {"string", "iri-reference"},
+	"uri-template":          {"string", "uri-template"},
+	"json-pointer":          {"string", "json-pointer"},
+	"relative-json-pointer": {"string", "relative-json-pointer"},
+	"regex":                 {"string", "regex"},
 }
 
-func (m *SchemaDataModel) fillProperTypeFormat(p *property, typeText string, formatText string) {
-	// name := replaceName(keyName)
-	p.Type = typeText
-	p.Format = formatText
-}
-
-func (m *SchemaDataModel) fillObject(p *property, n string, t string) {
-	// name := replaceName(n)
-	p.Type = t
-	// p.Format = append(p.Format, name)
+func getTypeFormatByMapping(typeT string) (string, string) {
+	if v, ok := formatMapping[typeT]; ok {
+		return v[0], v[1]
+	}
+	return "string", ""
 }

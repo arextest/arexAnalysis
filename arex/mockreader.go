@@ -186,20 +186,51 @@ func batchGenerateSchema(ctx context.Context, lastTime time.Time) {
 
 // Ctrip AREX Data
 func batchGenerateByCtripAREX(ctx context.Context) {
-	clientOptions := &options.ClientOptions{}
-	clientOptions.ApplyURI(`mongodb://t_fltreplaydata:aUJxgKpsje8c_RWYdkSi@fltreplaydata01.mongo.db.fat.qa.nt.ctripcorp.com:55111/?replicaSet=fatfltpub01&authSource=fltreplaydatadb`)
-	clientOptions.SetDirect(true)
-	clientOptions.SetMaxPoolSize(100)
+	veriftyKeyAndJSON := func(unikey string, valTest interface{}) {
+		if valTest == nil {
+			return
+		}
 
-	client, err := mongo.Connect(ctx, clientOptions)
-	if err != nil {
-		log.Panic(err)
+		testBytes, err := unzipBase64andGzipString(valTest.(string))
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		testJSON := make(map[string]interface{})
+		err = json.Unmarshal(testBytes, &testJSON)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		status, err := validateSchema(unikey, testBytes)
+		if err != nil {
+			log.Printf("validate fail %v %s", unikey, status)
+		}
 	}
 
+	connectAREXFAT := func() *mongo.Collection {
+		clientOptions := &options.ClientOptions{}
+		clientOptions.ApplyURI(`mongodb://t_fltreplaydata:aUJxgKpsje8c_RWYdkSi@fltreplaydata01.mongo.db.fat.qa.nt.ctripcorp.com:55111/?replicaSet=fatfltpub01&authSource=fltreplaydatadb`)
+		clientOptions.SetDirect(true)
+		clientOptions.SetMaxPoolSize(100)
+
+		client, err := mongo.Connect(ctx, clientOptions)
+		if err != nil {
+			log.Panic(err)
+		}
+		db := client.Database("fltreplaydatadb")
+		return db.Collection("ReplayCompareResultNew")
+	}
+
+	ds := connectAREXFAT()
 	filter := bson.M{}
+	// serverlist, err := ds.Distinct(ctx, "service", filter)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	return
+	// }
+	// fmt.Println(serverlist...)
 	opts := options.Find().SetLimit(1000)
-	db := client.Database("fltreplaydatadb")
-	ds := db.Collection("ReplayCompareResultNew")
 	cursor, err := ds.Find(ctx, filter, opts)
 	if err != nil {
 		log.Panic(err)
@@ -235,23 +266,6 @@ func batchGenerateByCtripAREX(ctx context.Context) {
 
 		uniKey := getAREXKey(serviceName, apiName)
 		valTest := oneM["testmsg"]
-		if valTest != nil {
-			testBytes, err := unzipBase64andGzipString(valTest.(string))
-			if err != nil {
-				log.Println(err)
-				continue
-			}
-			testJSON := make(map[string]interface{})
-			err = json.Unmarshal(testBytes, &testJSON)
-			if err != nil {
-				log.Println(err)
-				continue
-			}
-			status, err := validateSchema(uniKey, testBytes)
-			if err != nil {
-				log.Printf("validate fail %v %s", uniKey, status)
-			}
-		}
-
+		veriftyKeyAndJSON(uniKey, valTest)
 	}
 }

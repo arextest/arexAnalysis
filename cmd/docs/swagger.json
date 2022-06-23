@@ -1,0 +1,19 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "AREX Analysis to generate json-schema, to generate testcase auto.",
+        "title": "AREX Analysis",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "arexadmin@arex.com",
+            "url": "http://www.swagger.io/support",
+            "email": "support@swagger.io"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0"
+    },
+    "paths": {}
+}

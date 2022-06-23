@@ -1,0 +1,14 @@
+info:
+  contact:
+    email: support@swagger.io
+    name: arexadmin@arex.com
+    url: http://www.swagger.io/support
+  description: AREX Analysis to generate json-schema, to generate testcase auto.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: AREX Analysis
+  version: "1.0"
+paths: {}
+swagger: "2.0"

@@ -81,3 +81,11 @@ func Test_ZSTD(t *testing.T) {
 	batchGenerateSchema(context.Background(), time.Time{})
 
 }
+
+func Test_CaseGenerate(t *testing.T) {
+	res := getTestCases()
+	for _, oneCase := range res {
+		fmt.Println(oneCase.ToCaseText())
+	}
+
+}

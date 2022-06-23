@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -61,6 +62,17 @@ func AsyncHandle(handle func(*gin.Context)) func(*gin.Context) {
 	}
 }
 
+// getSchemas get all json-schema
+// @Summary json-schema interface
+// @Description get-all-jsonschema
+// @Tags tags
+// @Accept application/json
+// @Produce application/json
+// @Param Authorization header string false "Bearer 用户令牌"
+// @Param object query models.ParamPostList false "查询参数"
+// @Security ApiKeyAuth
+// @Success 200 {object} _ResponsePostList
+// @Router /posts2 [get]
 func getSchemas(c *gin.Context) {
 	limit := c.Query("limit")
 	intLimit, err := strconv.Atoi(limit)
@@ -87,77 +99,88 @@ func getSchemaByKey(c *gin.Context) {
 }
 
 func postSchema(c *gin.Context) {
-	key := c.Param("key")
+	saveSchemaByKey := func(key string, data []byte) {
+		jsonData := make(map[string]interface{})
+		err := json.Unmarshal(data, &jsonData)
+		if err != nil {
+			c.IndentedJSON(http.StatusForbidden, gin.H{"message": "json struct failed"})
+			return
+		}
+		schemajson, err := json.Marshal(jsonData)
 
+		var ss schemaStore
+		ss.Key = key
+		ss.Schema = string(schemajson)
+		saveSchema(context.Background(), ss)
+	}
+	key := c.Param("key")
 	data, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
 		c.IndentedJSON(http.StatusExpectationFailed, gin.H{"message": "put failed:" + err.Error()})
 		return
 	}
-	jsonData := make(map[string]interface{})
-	err = json.Unmarshal(data, &jsonData)
-	if err != nil {
-		c.IndentedJSON(http.StatusForbidden, gin.H{"message": "json struct failed"})
-		return
-	}
-	schemajson, err := json.Marshal(jsonData)
-
-	var ss schemaStore
-	ss.Key = key
-	ss.Schema = string(schemajson)
-	saveSchema(context.Background(), ss)
+	saveSchemaByKey(key, data)
 
 	c.IndentedJSON(http.StatusCreated, gin.H{"message": "success"})
 }
 
 func putSchema(c *gin.Context) {
-	key := c.Param("key")
+	compareSchemaToSave := func(key string, data []byte) *jsonschema.SchemaDocument {
+		res, err := serviceGenerateSchema(data)
+		if err != nil {
+			fmt.Println(err)
+			return nil
+		}
+		var ss schemaStore
+		ss.Key = key
+		storeData, err := json.Marshal(res.Document)
+		if err != nil {
+			fmt.Println(err)
+			return nil
+		}
+		ss.Schema = string(storeData)
+		saveSchema(context.Background(), ss)
+		return res.Document
+	}
 
+	key := c.Param("key")
 	jsonData, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
 		c.IndentedJSON(http.StatusExpectationFailed, gin.H{"message": "put failed:" + err.Error()})
 		return
 	}
-
-	res, err := serviceGenerateSchema(jsonData)
-	if err != nil {
-		c.IndentedJSON(http.StatusConflict, err.Error())
-		return
-	}
-	var ss schemaStore
-	ss.Key = key
-	storeData, err := json.Marshal(res.Document)
-	if err != nil {
-		c.IndentedJSON(http.StatusConflict, gin.H{"message": "schema marshal error"})
-	}
-	ss.Schema = string(storeData)
-	saveSchema(context.Background(), ss)
-	c.IndentedJSON(http.StatusAccepted, res.Document)
+	doc := compareSchemaToSave(key, jsonData)
+	c.IndentedJSON(http.StatusAccepted, doc)
 }
 
 func patchSchema(c *gin.Context) {
-	key := c.Param("key")
+	mergeSchemaByKey := func(key string, jsonData []byte) *jsonschema.SchemaDocument {
+		oldSchema := querySchema(context.Background(), key)
+		newschema, err := serviceUpdateSchema(oldSchema.Schema, jsonData)
+		if err != nil {
+			fmt.Println(err)
+			return nil
+		}
 
+		var ss schemaStore
+		ss.Key = key
+		storeData, err := json.Marshal(newschema)
+		if err != nil {
+			c.IndentedJSON(http.StatusConflict, gin.H{"message": "schema marshal error"})
+		}
+		ss.Schema = string(storeData)
+		saveSchema(context.Background(), ss)
+		return newschema
+	}
+
+	key := c.Param("key")
 	jsonData, err := ioutil.ReadAll(c.Request.Body)
-	if err != nil {
+	newschema := mergeSchemaByKey(key, jsonData)
+	if newschema == nil {
 		c.IndentedJSON(http.StatusExpectationFailed, gin.H{"message": "put failed:" + err.Error()})
 		return
 	}
 
-	oldSchema := querySchema(context.Background(), key)
-	newschema, err := serviceUpdateSchema(oldSchema.Schema, jsonData)
-	if err != nil {
-		c.IndentedJSON(http.StatusConflict, gin.H{"message": "schema marshal error"})
-	}
-
-	var ss schemaStore
-	ss.Key = key
-	storeData, err := json.Marshal(newschema)
-	if err != nil {
-		c.IndentedJSON(http.StatusConflict, gin.H{"message": "schema marshal error"})
-	}
-	ss.Schema = string(storeData)
-	saveSchema(context.Background(), ss)
 	c.IndentedJSON(http.StatusAccepted, newschema)
 }
 

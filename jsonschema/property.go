@@ -2,7 +2,7 @@ package jsonschema
 
 import (
 	"encoding/json"
-	"math/big"
+	"fmt"
 	"reflect"
 	"regexp"
 	"strings"
@@ -37,51 +37,126 @@ func (d *SchemaDocument) MergeSchemaDocument(y *SchemaDocument) error {
 
 }
 
+// mergeProperty : merge Y to X
 func mergeProperty(x *property, y *property) error {
+	mergeStringProperty := func(a *property, b *property) {
+		if b.Format != a.Format {
+			if a.Format == "" {
+				a.Format = b.Format
+			} else {
+				fmt.Printf("error format not equal %s %s", a.Format, b.Format)
+			}
+		}
+
+		if len(b.Examples) > 0 {
+			a.Examples = append(a.Examples, b.Examples...)
+		}
+
+		if b.MaxLength > a.MaxLength {
+			a.MaxLength = b.MaxLength
+		}
+		if b.MinLength < a.MinLength {
+			a.MinLength = b.MinLength
+		}
+	}
+	mergeNullProperty := func(a *property, b *property) {
+		if a.Type == "null" {
+			a.Type = b.Type
+		}
+	}
+	mergeObjectProperty := func(a *property, b *property) {
+		if b.Items == nil {
+			return
+		}
+		if a.Items == nil {
+			a.Items = b.Items
+			return
+		}
+
+		err := mergeProperty(a.Items, b.Items)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		if b.Required != nil && a.Required == nil {
+			a.Required = b.Required
+			return
+		}
+		a.Required = intersect(a.Required, b.Required)
+	}
+	mergeArrayProperty := func(a *property, b *property) {
+		if b.Properties == nil {
+			return
+		}
+		if a.Properties == nil {
+			a.Properties = b.Properties
+			return
+		}
+
+		if b.MaxItems > a.MaxItems {
+			a.MaxItems = b.MaxItems
+		}
+		if b.MinItems < a.MinItems {
+			a.MinItems = b.MinItems
+		}
+
+		for key, value := range b.Properties {
+			if _, ok := a.Properties[key]; ok {
+				err := mergeProperty(a.Properties[key], value)
+				if err != nil {
+					return
+				}
+			} else {
+				a.Properties[key] = value
+			}
+		}
+	}
+	mergeNumberProperty := func(a *property, b *property) {
+		if b.Minimum < a.Minimum {
+			a.Minimum = b.Minimum
+		}
+		if b.Maximum > a.Maximum {
+			a.Maximum = b.Maximum
+		}
+		// TODO exclusiveMinimum exclusiveMaximum
+		a.Examples = append(a.Examples, b.Examples...)
+	}
+	mergeIntegerProperty := func(a *property, b *property) {
+		mergeNumberProperty(a, b)
+	}
+	mergeBoolProperty := func(a *property, b *property) {
+	}
+	mergeEnumProperty := func(a *property, b *property) {
+	}
+
 	if cmp.Equal(*x, *y) {
 		return nil
 	}
 
-	if y.Type != "" {
-		x.Type = y.Type
-	}
-	if y.Format != "" {
-		x.Format = y.Format
+	if y.Type != x.Type && x.Type != "null" && y.Type != "null" {
+		return fmt.Errorf("Type difference %s vs %s", x.Type, y.Type)
 	}
 
-	if y.Items != nil {
-		if x.Items == nil {
-			x.Items = y.Items
-		} else {
-			err := mergeProperty(x.Items, y.Items)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	if y.Properties != nil {
-		if x.Properties == nil {
-			x.Properties = y.Properties
-		}
-		for key, value := range y.Properties {
-			if _, ok := x.Properties[key]; ok {
-				err := mergeProperty(x.Properties[key], value)
-				if err != nil {
-					return err
-				}
-			} else {
-				x.Properties[key] = value
-			}
-		}
-	}
-
-	if y.Required != nil {
-		if x.Required == nil {
-			x.Required = y.Required
-		} else {
-			x.Required = intersect(x.Required, y.Required)
-		}
+	switch x.Type {
+	case "string":
+		mergeStringProperty(x, y)
+	case "null":
+		mergeNullProperty(x, y)
+	case "object":
+		mergeObjectProperty(x, y)
+	case "array":
+		mergeArrayProperty(x, y)
+	case "number":
+		mergeNumberProperty(x, y)
+	case "integer":
+		mergeIntegerProperty(x, y)
+	case "enum":
+		mergeEnumProperty(x, y)
+	case "bool":
+		mergeBoolProperty(x, y)
+	default:
+		return fmt.Errorf("Type difference %s vs %s", x.Type, y.Type)
 	}
 
 	return nil
@@ -175,10 +250,9 @@ type property struct {
 	UnevaluatedProperties *property                    `json:"-"`
 
 	// array validations
-	MinItems    int  `json:"-"` // -1 if not specified.
-	MaxItems    int  `json:"-"` // -1 if not specified.
-	UniqueItems bool `json:"-"`
-	// Items            interface{} `json:"items,omitempty"` // nil or *property or []*property
+	MinItems         int         `json:"minItems,omitempty"` // -1 if not specified.
+	MaxItems         int         `json:"maxItems,omitempty"` // -1 if not specified.
+	UniqueItems      bool        `json:"-"`
 	Items            *property   `json:"items,omitempty"`
 	AdditionalItems  interface{} `json:"-"` // nil or bool or *property.
 	PrefixItems      []*property `json:"-"`
@@ -190,20 +264,24 @@ type property struct {
 	UnevaluatedItems *property   `json:"-"`
 
 	// string validations
-	MinLength        int            `json:"-"` // -1 if not specified.
-	MaxLength        int            `json:"-"` // -1 if not specified.
+	MinLength        int            `json:"minLength,omitempty"` // -1 if not specified.
+	MaxLength        int            `json:"maxLength,omitempty"` // -1 if not specified.
 	Pattern          *regexp.Regexp `json:"-"`
 	ContentEncoding  string         `json:"-"`
 	ContentMediaType string         `json:"-"`
 	// mediaType        func([]byte) error `json:"-"`
 
 	// number validators
-	Minimum          *big.Rat `json:"-"`
-	ExclusiveMinimum *big.Rat `json:"-"`
-	Maximum          *big.Rat `json:"-"`
-	ExclusiveMaximum *big.Rat `json:"-"`
-	MultipleOf       *big.Rat `json:"-"`
-
+	// Minimum          *big.Rat `json:"minimum,omitempty"`
+	// ExclusiveMinimum *big.Rat `json:"-"`
+	// Maximum          *big.Rat `json:"maximum,omitempty"`
+	// ExclusiveMaximum *big.Rat `json:"-"`
+	// MultipleOf       *big.Rat `json:"-"`
+	Minimum          float64 `json:"minimum,omitempty"`
+	ExclusiveMinimum float64 `json:"-"`
+	Maximum          float64 `json:"maximum,omitempty"`
+	ExclusiveMaximum float64 `json:"-"`
+	MultipleOf       float64 `json:"-"`
 	// user defined extensions
 	Extensions map[string]ExtSchema `json:"-"`
 }
@@ -290,10 +368,6 @@ func (p *property) readFromStruct(t reflect.Type) {
 	}
 }
 
-var formatMapping = map[string][]string{
-	"time.Time": {"string", "date-time"},
-}
-
 var kindMapping = map[reflect.Kind]string{
 	reflect.Bool:    "boolean",
 	reflect.Int:     "integer",
@@ -312,13 +386,6 @@ var kindMapping = map[reflect.Kind]string{
 	reflect.Slice:   "array",
 	reflect.Struct:  "object",
 	reflect.Map:     "object",
-}
-
-func getTypeFormatByMapping(typeT string) (string, string) {
-	if v, ok := formatMapping[typeT]; ok {
-		return v[0], v[1]
-	}
-	return "", ""
 }
 
 func getTypeFromMapping(t reflect.Type) (string, string, reflect.Kind) {

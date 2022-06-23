@@ -2,324 +2,504 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
   "required": [
-    "id",
-    "dashboardId",
-    "isAiAlert",
-    "dashboardUid",
-    "dashboardSlug",
-    "panelId",
-    "name",
-    "state",
-    "newStateDate",
-    "evalDate",
-    "evalData",
-    "executionError",
-    "settings",
-    "url"
+   "id",
+   "dashboardId",
+   "dashboardSlug",
+   "dashboardUid",
+   "evalData",
+   "evalDate",
+   "executionError",
+   "isAiAlert",
+   "name",
+   "newStateDate",
+   "panelId",
+   "settings",
+   "state",
+   "url"
   ],
   "properties": {
-    "dashboardId": {
-      "type": "integer"
-    },
-    "dashboardSlug": {
-      "type": "string"
-    },
-    "dashboardUid": {
-      "type": "string"
-    },
-    "evalData": {
-      "type": "null"
-    },
-    "evalDate": {
-      "format": "date-time",
-      "type": "string"
-    },
-    "executionError": {
-      "type": "string"
-    },
-    "id": {
-      "type": "integer"
-    },
-    "isAiAlert": {
-      "type": "boolean"
-    },
-    "name": {
-      "type": "string"
-    },
-    "newStateDate": {
-      "format": "date-time",
-      "type": "string"
-    },
-    "panelId": {
-      "type": "integer"
-    },
-    "settings": {
-      "type": "object",
-      "required": [
-        "appid",
-        "conditions",
-        "datasourceName",
-        "emailGroups",
-        "executionErrorState",
-        "for",
-        "frequency",
-        "handler",
-        "level",
-        "name",
-        "noDataState",
-        "notifications",
-        "notificationsV2",
-        "users"
+   "dashboardId": {
+    "type": "number",
+    "minimum": "71866",
+    "maximum": "71866"
+   },
+   "dashboardSlug": {
+    "type": "string",
+    "minLength": 46,
+    "maxLength": 46
+   },
+   "dashboardUid": {
+    "examples": [
+     "luuI2O2nk"
+    ],
+    "type": "string",
+    "minLength": 9,
+    "maxLength": 9
+   },
+   "evalData": {
+    "type": "null"
+   },
+   "evalDate": {
+    "format": "date-time",
+    "type": "string",
+    "minLength": 20,
+    "maxLength": 20
+   },
+   "executionError": {
+    "examples": [
+     ""
+    ],
+    "type": "string"
+   },
+   "id": {
+    "type": "number",
+    "minimum": "23029",
+    "maximum": "23029"
+   },
+   "isAiAlert": {
+    "type": "boolean"
+   },
+   "name": {
+    "type": "string",
+    "minLength": 46,
+    "maxLength": 46
+   },
+   "newStateDate": {
+    "format": "date-time",
+    "type": "string",
+    "minLength": 25,
+    "maxLength": 25
+   },
+   "panelId": {
+    "type": "number",
+    "minimum": "18",
+    "maximum": "18"
+   },
+   "settings": {
+    "type": "object",
+    "required": [
+     "appid",
+     "conditions",
+     "datasourceName",
+     "emailGroups",
+     "executionErrorState",
+     "for",
+     "frequency",
+     "handler",
+     "level",
+     "name",
+     "noDataState",
+     "notifications",
+     "notificationsV2",
+     "users"
+    ],
+    "properties": {
+     "appid": {
+      "examples": [
+       "100020816"
       ],
-      "properties": {
-        "appid": {
-          "type": "string"
-        },
-        "conditions": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": ["evaluator", "operator", "query", "reducer", "type"],
-            "properties": {
-              "evaluator": {
-                "type": "object",
-                "required": ["alertLevel", "params", "timeRange", "type"],
-                "properties": {
-                  "alertLevel": {
-                    "type": "string"
-                  },
-                  "params": {
-                    "type": "array",
-                    "items": {
-                      "type": "number"
-                    }
-                  },
-                  "timeRange": {
-                    "type": "array"
-                  },
-                  "type": {
-                    "type": "string"
-                  }
-                }
-              },
-              "operator": {
-                "type": "object",
-                "required": ["type"],
-                "properties": {
-                  "type": {
-                    "type": "string"
-                  }
-                }
-              },
-              "query": {
-                "type": "object",
-                "required": [
-                  "datasourceId",
-                  "datasourceName",
-                  "datasourceType",
-                  "model",
-                  "params"
-                ],
-                "properties": {
-                  "datasourceId": {
-                    "type": "number"
-                  },
-                  "datasourceName": {
-                    "type": "string"
-                  },
-                  "datasourceType": {
-                    "type": "string"
-                  },
-                  "model": {
-                    "type": "object",
-                    "required": [
-                      "alertQuery",
-                      "database",
-                      "dateLoading",
-                      "dateTimeColDataType",
-                      "dateTimeType",
-                      "datetimeLoading",
-                      "disableSliceReq",
-                      "fillNullPoint",
-                      "format",
-                      "formattedQuery",
-                      "interval",
-                      "intervalFactor",
-                      "query",
-                      "rawQuery",
-                      "refId",
-                      "round",
-                      "table",
-                      "tableLoading"
-                    ],
-                    "properties": {
-                      "alertQuery": {
-                        "type": "string"
-                      },
-                      "database": {
-                        "type": "string"
-                      },
-                      "dateLoading": {
-                        "type": "boolean"
-                      },
-                      "dateTimeColDataType": {
-                        "type": "string"
-                      },
-                      "dateTimeType": {
-                        "type": "string"
-                      },
-                      "datetimeLoading": {
-                        "type": "boolean"
-                      },
-                      "disableSliceReq": {
-                        "type": "boolean"
-                      },
-                      "fillNullPoint": {
-                        "type": "boolean"
-                      },
-                      "format": {
-                        "type": "string"
-                      },
-                      "formattedQuery": {
-                        "type": "string"
-                      },
-                      "interval": {
-                        "type": "string"
-                      },
-                      "intervalFactor": {
-                        "type": "number"
-                      },
-                      "query": {
-                        "type": "string"
-                      },
-                      "rawQuery": {
-                        "type": "string"
-                      },
-                      "refId": {
-                        "type": "string"
-                      },
-                      "round": {
-                        "type": "string"
-                      },
-                      "table": {
-                        "type": "string"
-                      },
-                      "tableLoading": {
-                        "type": "boolean"
-                      }
-                    }
-                  },
-                  "params": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  }
-                }
-              },
-              "reducer": {
-                "type": "object",
-                "required": ["params", "type"],
-                "properties": {
-                  "params": {
-                    "type": "array"
-                  },
-                  "type": {
-                    "type": "string"
-                  }
-                }
-              },
-              "type": {
-                "type": "string"
-              }
-            }
+      "type": "string",
+      "minLength": 9,
+      "maxLength": 9
+     },
+     "conditions": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "items": {
+       "type": "object",
+       "required": [
+        "evaluator",
+        "operator",
+        "query",
+        "reducer",
+        "type"
+       ],
+       "properties": {
+        "evaluator": {
+         "type": "object",
+         "required": [
+          "alertLevel",
+          "params",
+          "timeRange",
+          "type"
+         ],
+         "properties": {
+          "alertLevel": {
+           "examples": [
+            "P2"
+           ],
+           "type": "string",
+           "minLength": 2,
+           "maxLength": 2
+          },
+          "params": {
+           "type": "array",
+           "minItems": 1,
+           "maxItems": 1,
+           "items": {
+            "type": "number",
+            "minimum": "5000",
+            "maximum": "5000"
+           }
+          },
+          "timeRange": {
+           "type": "array"
+          },
+          "type": {
+           "examples": [
+            "gt"
+           ],
+           "type": "string",
+           "minLength": 2,
+           "maxLength": 2
           }
+         }
         },
-        "datasourceName": {
-          "type": "string"
+        "operator": {
+         "type": "object",
+         "required": [
+          "type"
+         ],
+         "properties": {
+          "type": {
+           "examples": [
+            "and"
+           ],
+           "type": "string",
+           "minLength": 3,
+           "maxLength": 3
+          }
+         }
         },
+        "query": {
+         "type": "object",
+         "required": [
+          "datasourceId",
+          "datasourceName",
+          "datasourceType",
+          "model",
+          "params"
+         ],
+         "properties": {
+          "datasourceId": {
+           "type": "number",
+           "minimum": "259",
+           "maximum": "259"
+          },
+          "datasourceName": {
+           "examples": [
+            "Fra-Clickhouse-log"
+           ],
+           "type": "string",
+           "minLength": 18,
+           "maxLength": 18
+          },
+          "datasourceType": {
+           "type": "string",
+           "minLength": 24,
+           "maxLength": 24
+          },
+          "model": {
+           "type": "object",
+           "required": [
+            "alertQuery",
+            "database",
+            "dateLoading",
+            "dateTimeColDataType",
+            "dateTimeType",
+            "datetimeLoading",
+            "disableSliceReq",
+            "fillNullPoint",
+            "format",
+            "formattedQuery",
+            "interval",
+            "intervalFactor",
+            "query",
+            "rawQuery",
+            "refId",
+            "round",
+            "table",
+            "tableLoading"
+           ],
+           "properties": {
+            "alertQuery": {
+             "type": "string",
+             "minLength": 449,
+             "maxLength": 449
+            },
+            "database": {
+             "examples": [
+              "log"
+             ],
+             "type": "string",
+             "minLength": 3,
+             "maxLength": 3
+            },
+            "dateLoading": {
+             "type": "boolean"
+            },
+            "dateTimeColDataType": {
+             "examples": [
+              "timestamp"
+             ],
+             "type": "string",
+             "minLength": 9,
+             "maxLength": 9
+            },
+            "dateTimeType": {
+             "examples": [
+              "DATETIME"
+             ],
+             "type": "string",
+             "minLength": 8,
+             "maxLength": 8
+            },
+            "datetimeLoading": {
+             "type": "boolean"
+            },
+            "disableSliceReq": {
+             "type": "boolean"
+            },
+            "fillNullPoint": {
+             "type": "boolean"
+            },
+            "format": {
+             "examples": [
+              "time_series"
+             ],
+             "type": "string",
+             "minLength": 11,
+             "maxLength": 11
+            },
+            "formattedQuery": {
+             "type": "string",
+             "minLength": 84,
+             "maxLength": 84
+            },
+            "interval": {
+             "examples": [
+              "60s"
+             ],
+             "type": "string",
+             "minLength": 3,
+             "maxLength": 3
+            },
+            "intervalFactor": {
+             "type": "number",
+             "minimum": "1",
+             "maximum": "1"
+            },
+            "query": {
+             "format": "regex",
+             "type": "string",
+             "minLength": 156,
+             "maxLength": 156
+            },
+            "rawQuery": {
+             "type": "string",
+             "minLength": 512,
+             "maxLength": 512
+            },
+            "refId": {
+             "examples": [
+              "A"
+             ],
+             "type": "string",
+             "minLength": 1,
+             "maxLength": 1
+            },
+            "round": {
+             "examples": [
+              "60s"
+             ],
+             "type": "string",
+             "minLength": 3,
+             "maxLength": 3
+            },
+            "table": {
+             "type": "string",
+             "minLength": 22,
+             "maxLength": 22
+            },
+            "tableLoading": {
+             "type": "boolean"
+            }
+           }
+          },
+          "params": {
+           "type": "array",
+           "minItems": 3,
+           "maxItems": 3,
+           "items": {
+            "examples": [
+             "A"
+            ],
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1
+           }
+          }
+         }
+        },
+        "reducer": {
+         "type": "object",
+         "required": [
+          "params",
+          "type"
+         ],
+         "properties": {
+          "params": {
+           "type": "array"
+          },
+          "type": {
+           "examples": [
+            "avg"
+           ],
+           "type": "string",
+           "minLength": 3,
+           "maxLength": 3
+          }
+         }
+        },
+        "type": {
+         "examples": [
+          "query"
+         ],
+         "type": "string",
+         "minLength": 5,
+         "maxLength": 5
+        }
+       }
+      }
+     },
+     "datasourceName": {
+      "examples": [
+       "Fra-Clickhouse-log"
+      ],
+      "type": "string",
+      "minLength": 18,
+      "maxLength": 18
+     },
+     "emailGroups": {
+      "type": "array"
+     },
+     "executionErrorState": {
+      "examples": [
+       "keep_state"
+      ],
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 10
+     },
+     "for": {
+      "examples": [
+       "5m"
+      ],
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 2
+     },
+     "frequency": {
+      "examples": [
+       "1m"
+      ],
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 2
+     },
+     "handler": {
+      "type": "number",
+      "minimum": "1",
+      "maximum": "1"
+     },
+     "level": {
+      "examples": [
+       "P0"
+      ],
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 2
+     },
+     "name": {
+      "type": "string",
+      "minLength": 46,
+      "maxLength": 46
+     },
+     "noDataState": {
+      "examples": [
+       "ok"
+      ],
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 2
+     },
+     "notifications": {
+      "type": "array"
+     },
+     "notificationsV2": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "items": {
+       "type": "object",
+       "required": [
+        "emailGroups",
+        "isDefault",
+        "message",
+        "notifications",
+        "oncall",
+        "sendOwnerAdmin",
+        "splitNotice",
+        "users"
+       ],
+       "properties": {
         "emailGroups": {
-          "type": "array",
-          "items": {}
+         "type": "array"
         },
-        "executionErrorState": {
-          "type": "string"
+        "isDefault": {
+         "type": "boolean"
         },
-        "for": {
-          "type": "string"
-        },
-        "frequency": {
-          "type": "string"
-        },
-        "handler": {
-          "type": "integer"
-        },
-        "level": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "noDataState": {
-          "type": "string"
+        "message": {
+         "type": "string",
+         "minLength": 52,
+         "maxLength": 52
         },
         "notifications": {
-          "type": "array",
-          "items": {}
+         "type": "array"
         },
-        "notificationsV2": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": [
-              "emailGroups",
-              "isDefault",
-              "message",
-              "notifications",
-              "oncall",
-              "sendOwnerAdmin",
-              "splitNotice",
-              "users"
-            ],
-            "properties": {
-              "emailGroups": {
-                "type": "array"
-              },
-              "isDefault": {
-                "type": "boolean"
-              },
-              "message": {
-                "type": "string"
-              },
-              "notifications": {
-                "type": "array"
-              },
-              "oncall": {
-                "type": "object"
-              },
-              "sendOwnerAdmin": {
-                "type": "boolean"
-              },
-              "splitNotice": {
-                "type": "boolean"
-              },
-              "users": {
-                "type": "array"
-              }
-            }
-          }
+        "oncall": {
+         "type": "object"
+        },
+        "sendOwnerAdmin": {
+         "type": "boolean"
+        },
+        "splitNotice": {
+         "type": "boolean"
         },
         "users": {
-          "type": "array",
-          "items": {}
+         "type": "array"
         }
+       }
       }
-    },
-    "state": {
-      "type": "string"
-    },
-    "url": {
-      "type": "string"
+     },
+     "users": {
+      "type": "array"
+     }
     }
+   },
+   "state": {
+    "examples": [
+     "ok"
+    ],
+    "type": "string",
+    "minLength": 2,
+    "maxLength": 2
+   },
+   "url": {
+    "type": "string",
+    "minLength": 69,
+    "maxLength": 69
+   }
   }
-}
+ }
