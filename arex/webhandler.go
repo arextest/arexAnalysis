@@ -63,16 +63,16 @@ func AsyncHandle(handle func(*gin.Context)) func(*gin.Context) {
 }
 
 // getSchemas get all json-schema
-// @Summary json-schema interface
-// @Description get-all-jsonschema
-// @Tags tags
-// @Accept application/json
-// @Produce application/json
-// @Param Authorization header string false "Bearer 用户令牌"
-// @Param object query models.ParamPostList false "查询参数"
-// @Security ApiKeyAuth
-// @Success 200 {object} _ResponsePostList
-// @Router /posts2 [get]
+// @Summary      Query all json-schema format json
+// @Description  ?limit=10 limit the max range
+// @Description  http Get /schemas
+// @Tags         JSON-Schema
+// @Accept       application/json
+// @Produce      application/json
+// @Param        limit  path int  true  "query limit count"
+// @Security     ApiKeyAuth
+// @Success      200  {string} string  "[]json-schemas"
+// @Router       /schemas [get]
 func getSchemas(c *gin.Context) {
 	limit := c.Query("limit")
 	intLimit, err := strconv.Atoi(limit)
@@ -83,6 +83,17 @@ func getSchemas(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, res)
 }
 
+// getSchemaByKey get the special key json of json-schema
+// @Summary      Post http mode, body commit a JSON of Json-schema style and Store it to database.
+// @Description  Query one json-schema by key
+// @Tags         JSON-Schema
+// @Accept       application/json
+// @Produce      application/json
+// @Param        key  path  string  true  "schema key name"
+// @Security     ApiKeyAuth
+// @Success      200  {string}  string "{}"
+// @Fail         400  {string}  string "---"
+// @Router       /schema/{key} [get]
 func getSchemaByKey(c *gin.Context) {
 	key := c.Param("key")
 	res := querySchema(context.Background(), key)
@@ -98,6 +109,18 @@ func getSchemaByKey(c *gin.Context) {
 
 }
 
+// postSchema    postSchema json-schema
+// @Summary      store json-schema to database by key
+// @Description  post data to store. path /keyName. Body {}json-schema
+// @Tags         JSON-Schema
+// @Accept       application/json
+// @Produce      application/json
+// @Param        key  path  string  true  "restapiApplication-L2FjdHVhdG9yL21hcHBpbmdz"
+// @Param        body body  string  true  "{}"
+// @Security     ApiKeyAuth
+// @Success      200  {string}  string "---"
+// @Fail         400  {string}  string "---"
+// @Router       /schema/{key} [post]
 func postSchema(c *gin.Context) {
 	saveSchemaByKey := func(key string, data []byte) {
 		jsonData := make(map[string]interface{})
@@ -124,6 +147,18 @@ func postSchema(c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, gin.H{"message": "success"})
 }
 
+// putSchema putSchema json-schema
+// @Summary      input json and parse json to schema, then save the schema by key
+// @Description  post /schema-key body contain origin json string {}
+// @Tags         JSON-Schema
+// @Accept       application/json
+// @Produce      application/json
+// @Param        key  path  string  true  "schema key name"
+// @Param        body body  string  true  "{json}"
+// @Security     ApiKeyAuth
+// @Success      200  {string}  string "---"
+// @Fail         400  {string}  string "---"
+// @Router       /schema/{key} [put]
 func putSchema(c *gin.Context) {
 	compareSchemaToSave := func(key string, data []byte) *jsonschema.SchemaDocument {
 		res, err := serviceGenerateSchema(data)
@@ -153,6 +188,18 @@ func putSchema(c *gin.Context) {
 	c.IndentedJSON(http.StatusAccepted, doc)
 }
 
+// patchSchema   merge schema to existed schema
+// @Summary      patchSchema to merge new json to schema and merge to existed json-schema
+// @Description  post new json and parse it to merge existed json-schema
+// @Tags         JSON-Schema
+// @Accept       application/json
+// @Produce      application/json
+// @Param        key  path  string  true  "schema key name"
+// @Param        body body  string  true  "{}"
+// @Security     ApiKeyAuth
+// @Success      200  {string}  string "---"
+// @Fail         400  {string}  string "---"
+// @Router       /schema/{key} [patch]
 func patchSchema(c *gin.Context) {
 	mergeSchemaByKey := func(key string, jsonData []byte) *jsonschema.SchemaDocument {
 		oldSchema := querySchema(context.Background(), key)
@@ -184,6 +231,17 @@ func patchSchema(c *gin.Context) {
 	c.IndentedJSON(http.StatusAccepted, newschema)
 }
 
+// deleteSchema  delete json-schema by key
+// @Summary      delete json-schema by key
+// @Description  send DELETE method http by jsonschema key
+// @Tags         JSON-Schema
+// @Accept       application/json
+// @Produce      application/json
+// @Param        key  path  string  true  "schema key name"
+// @Security     ApiKeyAuth
+// @Success      200  {string}  string "---"
+// @Fail         400  {string}  string "---"
+// @Router       /schemas/{key} [delete]
 func deleteSchema(c *gin.Context) {
 	key := c.Param("key")
 	res := delteSchemaData(context.Background(), key)
@@ -201,7 +259,18 @@ type validation struct {
 	Result string `json:"result"`
 }
 
-// input key, jsonData
+// getValidation Validate json by json-schema that stored in database
+// @Summary      Validate json by json-schema that stored in database
+// @Description  get by keyname and body (Json format), then valid json by the keyname's json-schema
+// @Tags         Validate-Schema
+// @Accept       application/json
+// @Produce      application/json
+// @Param        key   path  string  true  "schema key name"
+// @Param        body  body  string  true  "{}"
+// @Security     ApiKeyAuth
+// @Success      200  {string}  string "---"
+// @Fail         400  {string}  string "---"
+// @Router       /validation/{key} [get]
 func getValidation(c *gin.Context) {
 	key := c.Param("key")
 	if key == "" {
@@ -236,6 +305,18 @@ func validateSchema(key string, jsonData []byte) (string, error) {
 	return serviceValidateJSONBySchema(string(data), string(jsonData))
 }
 
+// postValidation  execute validate result
+// @Summary      valid json by json-schema (input: key of json-schema)
+// @Description  post schema's key and json that will be valid. return compared result
+// @Description  if key is not exist, then it return nil
+// @Tags         Validate-Schema
+// @Accept       application/json
+// @Produce      application/json
+// @Param        validation body  validation   true  "struct validation{}"
+// @Security     ApiKeyAuth
+// @Success      200   {string} string "{result}"
+// @Failure      400   {string} string "{result}"
+// @Router       /validation [post]
 func postValidation(c *gin.Context) {
 	var valid validation
 	if err := c.BindJSON(&valid); err != nil {
@@ -282,6 +363,17 @@ type comparing struct {
 	Options string `json:"options"`
 }
 
+// postComparing  compare two json and get compared result
+// @Summary      compare json
+// @Description  post 2 json and return the difference
+// @Tags         Comparing JSON
+// @Accept       application/json
+// @Produce      application/json
+// @Param        body  body  comparing  true  "comparing struct"
+// @Security     ApiKeyAuth
+// @Success      201  {string}  string "[]object"
+// @Failure      400  {string}  string "---"
+// @Router       /comparing [post]
 func postComparing(c *gin.Context) {
 	var compare comparing
 	if err := c.BindJSON(&compare); err != nil {
@@ -290,5 +382,5 @@ func postComparing(c *gin.Context) {
 	}
 
 	res := serviceDiff2JSON(compare.ValueX, compare.ValueY)
-	c.IndentedJSON(http.StatusAccepted, res.Diffs)
+	c.IndentedJSON(http.StatusCreated, res.Diffs)
 }

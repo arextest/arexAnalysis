@@ -1,3 +1,24 @@
+definitions:
+  arex.comparing:
+    properties:
+      options:
+        type: string
+      vx:
+        type: string
+      vy:
+        type: string
+    type: object
+  arex.validation:
+    properties:
+      input:
+        type: string
+      key:
+        type: string
+      result:
+        type: string
+      schema:
+        type: string
+    type: object
 info:
   contact:
     email: support@swagger.io
@@ -10,5 +31,249 @@ info:
   termsOfService: http://swagger.io/terms/
   title: AREX Analysis
   version: "1.0"
-paths: {}
+paths:
+  /comparing:
+    post:
+      consumes:
+      - application/json
+      description: post 2 json and return the difference
+      parameters:
+      - description: comparing struct
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/arex.comparing'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: '[]object'
+          schema:
+            type: string
+        "400":
+          description: '---'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: compare json
+      tags:
+      - Comparing JSON
+  /schema/{key}:
+    get:
+      consumes:
+      - application/json
+      description: Query one json-schema by key
+      parameters:
+      - description: schema key name
+        in: path
+        name: key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Post http mode, body commit a JSON of Json-schema style and Store it
+        to database.
+      tags:
+      - JSON-Schema
+    patch:
+      consumes:
+      - application/json
+      description: post new json and parse it to merge existed json-schema
+      parameters:
+      - description: schema key name
+        in: path
+        name: key
+        required: true
+        type: string
+      - description: '{}'
+        in: body
+        name: body
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '---'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: patchSchema to merge new json to schema and merge to existed json-schema
+      tags:
+      - JSON-Schema
+    post:
+      consumes:
+      - application/json
+      description: post data to store. path /keyName. Body {}json-schema
+      parameters:
+      - description: restapiApplication-L2FjdHVhdG9yL21hcHBpbmdz
+        in: path
+        name: key
+        required: true
+        type: string
+      - description: '{}'
+        in: body
+        name: body
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '---'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: store json-schema to database by key
+      tags:
+      - JSON-Schema
+    put:
+      consumes:
+      - application/json
+      description: post /schema-key body contain origin json string {}
+      parameters:
+      - description: schema key name
+        in: path
+        name: key
+        required: true
+        type: string
+      - description: '{json}'
+        in: body
+        name: body
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '---'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: input json and parse json to schema, then save the schema by key
+      tags:
+      - JSON-Schema
+  /schemas:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        ?limit=10 limit the max range
+        http Get /schemas
+      parameters:
+      - description: query limit count
+        in: path
+        name: limit
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '[]json-schemas'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Query all json-schema format json
+      tags:
+      - JSON-Schema
+  /schemas/{key}:
+    delete:
+      consumes:
+      - application/json
+      description: send DELETE method http by jsonschema key
+      parameters:
+      - description: schema key name
+        in: path
+        name: key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '---'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: delete json-schema by key
+      tags:
+      - JSON-Schema
+  /validation:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        post schema's key and json that will be valid. return compared result
+        if key is not exist, then it return nil
+      parameters:
+      - description: struct validation{}
+        in: body
+        name: validation
+        required: true
+        schema:
+          $ref: '#/definitions/arex.validation'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{result}'
+          schema:
+            type: string
+        "400":
+          description: '{result}'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: 'valid json by json-schema (input: key of json-schema)'
+      tags:
+      - Validate-Schema
+  /validation/{key}:
+    get:
+      consumes:
+      - application/json
+      description: get by keyname and body (Json format), then valid json by the keyname's
+        json-schema
+      parameters:
+      - description: schema key name
+        in: path
+        name: key
+        required: true
+        type: string
+      - description: '{}'
+        in: body
+        name: body
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '---'
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Validate json by json-schema that stored in database
+      tags:
+      - Validate-Schema
 swagger: "2.0"

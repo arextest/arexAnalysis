@@ -24,7 +24,420 @@ const docTemplate = `{
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
-    "paths": {}
+    "paths": {
+        "/comparing": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "post 2 json and return the difference",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Comparing JSON"
+                ],
+                "summary": "compare json",
+                "parameters": [
+                    {
+                        "description": "comparing struct",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/arex.comparing"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "[]object",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "---",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/schema/{key}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Query one json-schema by key",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "JSON-Schema"
+                ],
+                "summary": "Post http mode, body commit a JSON of Json-schema style and Store it to database.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "schema key name",
+                        "name": "key",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "post /schema-key body contain origin json string {}",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "JSON-Schema"
+                ],
+                "summary": "input json and parse json to schema, then save the schema by key",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "schema key name",
+                        "name": "key",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "{json}",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "---",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "post data to store. path /keyName. Body {}json-schema",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "JSON-Schema"
+                ],
+                "summary": "store json-schema to database by key",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "restapiApplication-L2FjdHVhdG9yL21hcHBpbmdz",
+                        "name": "key",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "{}",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "---",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "post new json and parse it to merge existed json-schema",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "JSON-Schema"
+                ],
+                "summary": "patchSchema to merge new json to schema and merge to existed json-schema",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "schema key name",
+                        "name": "key",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "{}",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "---",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/schemas": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "?limit=10 limit the max range\nhttp Get /schemas",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "JSON-Schema"
+                ],
+                "summary": "Query all json-schema format json",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "query limit count",
+                        "name": "limit",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "[]json-schemas",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/schemas/{key}": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "send DELETE method http by jsonschema key",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "JSON-Schema"
+                ],
+                "summary": "delete json-schema by key",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "schema key name",
+                        "name": "key",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "---",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/validation": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "post schema's key and json that will be valid. return compared result\nif key is not exist, then it return nil",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Validate-Schema"
+                ],
+                "summary": "valid json by json-schema (input: key of json-schema)",
+                "parameters": [
+                    {
+                        "description": "struct validation{}",
+                        "name": "validation",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/arex.validation"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{result}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "{result}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/validation/{key}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "get by keyname and body (Json format), then valid json by the keyname's json-schema",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Validate-Schema"
+                ],
+                "summary": "Validate json by json-schema that stored in database",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "schema key name",
+                        "name": "key",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "{}",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "---",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "arex.comparing": {
+            "type": "object",
+            "properties": {
+                "options": {
+                    "type": "string"
+                },
+                "vx": {
+                    "type": "string"
+                },
+                "vy": {
+                    "type": "string"
+                }
+            }
+        },
+        "arex.validation": {
+            "type": "object",
+            "properties": {
+                "input": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "result": {
+                    "type": "string"
+                },
+                "schema": {
+                    "type": "string"
+                }
+            }
+        }
+    }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it

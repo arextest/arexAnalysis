@@ -21,17 +21,17 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-// @title AREX Analysis
-// @version 1.0
-// @description AREX Analysis to generate json-schema, to generate testcase auto.
-// @termsOfService http://swagger.io/terms/
+// @title           AREX Analysis
+// @version         1.0
+// @description     AREX Analysis to generate json-schema, to generate testcase auto.
+// @termsOfService  http://swagger.io/terms/
 
-// @contact.name arexadmin@arex.com
-// @contact.url http://www.swagger.io/support
-// @contact.email support@swagger.io
+// @contact.name   arexadmin@arex.com
+// @contact.url    http://www.swagger.io/support
+// @contact.email  support@swagger.io
 
-// @license.name Apache 2.0
-// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+// @license.name  Apache 2.0
+// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
 
 func main() {
 	serviceInit()
@@ -92,7 +92,6 @@ func serviceInit() {
 		engine.Use(gin.Recovery())
 		// engine.Use(cors.Default())
 		arex.InstallHandler(engine)
-		// docs.SwaggerInfo.BasePath = "/"
 		engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 		srv := &http.Server{
