@@ -84,7 +84,7 @@ func getSchemas(c *gin.Context) {
 }
 
 // getSchemaByKey get the special key json of json-schema
-// @Summary      Post http mode, body commit a JSON of Json-schema style and Store it to database.
+// @Summary      query json-schema by key
 // @Description  Query one json-schema by key
 // @Tags         JSON-Schema
 // @Accept       application/json
@@ -262,7 +262,7 @@ type validation struct {
 // getValidation Validate json by json-schema that stored in database
 // @Summary      Validate json by json-schema that stored in database
 // @Description  get by keyname and body (Json format), then valid json by the keyname's json-schema
-// @Tags         Validate-Schema
+// @Tags         Validate by json-schema
 // @Accept       application/json
 // @Produce      application/json
 // @Param        key   path  string  true  "schema key name"
@@ -306,10 +306,10 @@ func validateSchema(key string, jsonData []byte) (string, error) {
 }
 
 // postValidation  execute validate result
-// @Summary      valid json by json-schema (input: key of json-schema)
-// @Description  post schema's key and json that will be valid. return compared result
+// @Summary      valid json by json-schema (input: validation struct)
+// @Description  post struct that include schema's key and json that will be valid. return valid result
 // @Description  if key is not exist, then it return nil
-// @Tags         Validate-Schema
+// @Tags         Validate by json-schema
 // @Accept       application/json
 // @Produce      application/json
 // @Param        validation body  validation   true  "struct validation{}"

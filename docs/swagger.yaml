@@ -80,8 +80,7 @@ paths:
             type: string
       security:
       - ApiKeyAuth: []
-      summary: Post http mode, body commit a JSON of Json-schema style and Store it
-        to database.
+      summary: query json-schema by key
       tags:
       - JSON-Schema
     patch:
@@ -221,7 +220,7 @@ paths:
       consumes:
       - application/json
       description: |-
-        post schema's key and json that will be valid. return compared result
+        post struct that include schema's key and json that will be valid. return valid result
         if key is not exist, then it return nil
       parameters:
       - description: struct validation{}
@@ -243,9 +242,9 @@ paths:
             type: string
       security:
       - ApiKeyAuth: []
-      summary: 'valid json by json-schema (input: key of json-schema)'
+      summary: 'valid json by json-schema (input: validation struct)'
       tags:
-      - Validate-Schema
+      - Validate by json-schema
   /validation/{key}:
     get:
       consumes:
@@ -275,5 +274,5 @@ paths:
       - ApiKeyAuth: []
       summary: Validate json by json-schema that stored in database
       tags:
-      - Validate-Schema
+      - Validate by json-schema
 swagger: "2.0"

@@ -87,7 +87,7 @@ const docTemplate = `{
                 "tags": [
                     "JSON-Schema"
                 ],
-                "summary": "Post http mode, body commit a JSON of Json-schema style and Store it to database.",
+                "summary": "query json-schema by key",
                 "parameters": [
                     {
                         "type": "string",
@@ -320,7 +320,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "post schema's key and json that will be valid. return compared result\nif key is not exist, then it return nil",
+                "description": "post struct that include schema's key and json that will be valid. return valid result\nif key is not exist, then it return nil",
                 "consumes": [
                     "application/json"
                 ],
@@ -328,9 +328,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Validate-Schema"
+                    "Validate by json-schema"
                 ],
-                "summary": "valid json by json-schema (input: key of json-schema)",
+                "summary": "valid json by json-schema (input: validation struct)",
                 "parameters": [
                     {
                         "description": "struct validation{}",
@@ -373,7 +373,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Validate-Schema"
+                    "Validate by json-schema"
                 ],
                 "summary": "Validate json by json-schema that stored in database",
                 "parameters": [
