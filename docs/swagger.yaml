@@ -215,6 +215,56 @@ paths:
       summary: delete json-schema by key
       tags:
       - JSON-Schema
+  /testcases/golang/{appid}:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        appid/?start=2022-2-22 limit the beggining
+        http Get /schemas
+      parameters:
+      - description: start date
+        in: path
+        name: start
+        required: true
+        type: string
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: json data
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Query testcases json of golang
+      tags:
+      - Testcases
+  /testcases/postman/{appid}:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        appid/?start=2022-2-22 limit the beggining
+        http Get /schemas
+      parameters:
+      - description: start date
+        in: path
+        name: start
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: json data
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Query testcases json of postman
+      tags:
+      - Testcases
   /validation:
     post:
       consumes:

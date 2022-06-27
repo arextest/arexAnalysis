@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/arextest/arexAnalysis/jsonschema"
@@ -27,6 +28,9 @@ func InstallHandler(engine *gin.Engine) {
 	engine.POST("/validation", middleware, postValidation)
 
 	engine.POST("/comparing", middleware, postComparing)
+
+	engine.GET("/testcases/postman/:appid", middleware, getTestCasesOfPostman)
+	engine.GET("/testcases/golang/:appid", middleware, getTestCasesOfGolang)
 }
 
 func middleware(c *gin.Context) {
@@ -383,4 +387,47 @@ func postComparing(c *gin.Context) {
 
 	res := serviceDiff2JSON(compare.ValueX, compare.ValueY)
 	c.IndentedJSON(http.StatusCreated, res.Diffs)
+}
+
+// getTestCasesOfPostman generate testcase that has postman format
+// @Summary      Query testcases json of postman
+// @Description  appid/?start=2022-2-22 limit the beggining
+// @Description  http Get /schemas
+// @Tags         Testcases
+// @Accept       application/json
+// @Produce      application/json
+// @Param        start  path string  true  "start date"
+// @Security     ApiKeyAuth
+// @Success      200  {string} string  "json data"
+// @Router       /testcases/postman/{appid} [get]
+func getTestCasesOfPostman(c *gin.Context) {
+	appid := c.Param("appid")
+	start := c.Query("start")
+
+	val := exportAREXToPostman(appid, start)
+	c.IndentedJSON(http.StatusOK, val)
+}
+
+// getTestCasesOfGolang generate testcase that has golang format
+// @Summary      Query testcases json of golang
+// @Description  appid/?start=2022-2-22 limit the beggining
+// @Description  http Get /schemas
+// @Tags         Testcases
+// @Accept       application/json
+// @Produce      text/plain
+// @Param        start  path string  true  "start date"
+// @Security     ApiKeyAuth
+// @Success      200  {string} string  "json data"
+// @Router       /testcases/golang/{appid} [get]
+func getTestCasesOfGolang(c *gin.Context) {
+	appid := c.Param("appid")
+	start := c.Query("start")
+
+	val := getTestCases(appid, start)
+	var caseText strings.Builder
+	for _, oneCase := range val {
+		caseText.WriteString(oneCase.ToCaseText())
+		caseText.WriteString("\r\n\r\n")
+	}
+	c.String(http.StatusOK, caseText.String())
 }

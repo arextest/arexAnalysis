@@ -45,7 +45,7 @@ func (t *testcase) ToCaseText() string {
 	return buf.String()
 }
 
-func getTestCases() []*testcase {
+func getTestCases(appid, start string) []*testcase {
 	convertSevletToTestCase := func(s *servletmocker) *testcase {
 		var tc testcase
 		tc.Title = s.AppID + "_" + strings.ReplaceAll(s.Path, "/", "_")
@@ -53,7 +53,13 @@ func getTestCases() []*testcase {
 		tc.Service = s.Method + "_" + strings.ReplaceAll(s.Path, "/", "_")
 		return &tc
 	}
-	rl := queryServletmocker(context.TODO(), time.Time{})
+	var startTime time.Time
+	startTime, err := time.Parse("2022-02-22", start)
+	if err != nil {
+		startTime = time.Time{}
+	}
+
+	rl := queryServletmocker(context.TODO(), appid, startTime)
 	tcs := make([]*testcase, 0)
 	for _, oneSevlet := range rl {
 		oCase := convertSevletToTestCase(oneSevlet)

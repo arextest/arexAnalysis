@@ -6,7 +6,6 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -35,7 +34,7 @@ type servletmocker struct {
 
 const servletmockerCollectionName = "ServletMocker"
 
-func queryServletmocker(ctx context.Context, lastTime time.Time) []*servletmocker {
+func queryServletmocker(ctx context.Context, appid string, lastTime time.Time) []*servletmocker {
 	db := ConnectOfMongoDB()
 	scs := db.Collection(servletmockerCollectionName)
 
@@ -47,6 +46,10 @@ func queryServletmocker(ctx context.Context, lastTime time.Time) []*servletmocke
 			},
 		}
 	}
+	if appid != "" {
+		filter["appId"] = appid
+	}
+
 	opts := options.Find().SetLimit(1000)
 
 	cursor, err := scs.Find(ctx, filter, opts)
@@ -73,8 +76,29 @@ func queryServletmocker(ctx context.Context, lastTime time.Time) []*servletmocke
 	return sliceMockers
 }
 
+func unZstdandBase64String(in string) ([]byte, error) {
+	oriData, err := dog.Decompress(nil, []byte(in))
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	unzipData, err := base64.StdEncoding.DecodeString(string(oriData))
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	// data, err := zstdDecompress(oneServlet.Response)
+	// data, err := gozstd.Decompress(nil, oneServlet.Response)
+
+	// if !json.Valid(oriData) {
+	// 	return nil, errors.New("json invalid")
+	// }
+	return unzipData, nil
+}
+
 //
-func unzipBase64andTstdString(in string) ([]byte, error) {
+func unBase64andZstdString(in string) ([]byte, error) {
 	unzipData, err := base64.StdEncoding.DecodeString(in)
 	if err != nil {
 		fmt.Println(err)
@@ -88,9 +112,9 @@ func unzipBase64andTstdString(in string) ([]byte, error) {
 		return nil, err
 	}
 
-	if !json.Valid(oriData) {
-		return nil, errors.New("json invalid")
-	}
+	// if !json.Valid(oriData) {
+	// 	return nil, errors.New("json invalid")
+	// }
 	return oriData, nil
 }
 
@@ -164,7 +188,7 @@ func spiderAREXSchemaData(ctx context.Context, serviceName, apiName string, json
 
 // Opensource AREX DATA
 func batchGenerateSchema(ctx context.Context, lastTime time.Time) {
-	servletArrays := queryServletmocker(ctx, lastTime)
+	servletArrays := queryServletmocker(ctx, "", lastTime)
 	if len(servletArrays) == 0 {
 		return
 	}
@@ -173,7 +197,7 @@ func batchGenerateSchema(ctx context.Context, lastTime time.Time) {
 		if oneServlet.AppID == "" || oneServlet.Path == "" {
 			continue
 		}
-		bytes, err := unzipBase64andTstdString(string(oneServlet.Response))
+		bytes, err := unBase64andZstdString(string(oneServlet.Response))
 		if err != nil {
 			fmt.Println(err)
 			continue

@@ -313,6 +313,80 @@ const docTemplate = `{
                 }
             }
         },
+        "/testcases/golang/{appid}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "appid/?start=2022-2-22 limit the beggining\nhttp Get /schemas",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Testcases"
+                ],
+                "summary": "Query testcases json of golang",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "start date",
+                        "name": "start",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "json data",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/testcases/postman/{appid}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "appid/?start=2022-2-22 limit the beggining\nhttp Get /schemas",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Testcases"
+                ],
+                "summary": "Query testcases json of postman",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "start date",
+                        "name": "start",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "json data",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/validation": {
             "post": {
                 "security": [

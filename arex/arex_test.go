@@ -5,12 +5,15 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
+	"os"
 	"testing"
 	"time"
 
 	dog "github.com/DataDog/zstd"
+	"github.com/a-h/generate"
 )
 
 func Test_BuildArexReport(t *testing.T) {
@@ -83,9 +86,39 @@ func Test_ZSTD(t *testing.T) {
 }
 
 func Test_CaseGenerate(t *testing.T) {
-	res := getTestCases()
+	res := getTestCases("", "")
 	for _, oneCase := range res {
 		fmt.Println(oneCase.ToCaseText())
 	}
 
+}
+
+func Test_GenerateStruct(t *testing.T) {
+	// data, err := ioutil.ReadFile("../testdata/postman.json")
+	// if err != nil {
+	// 	t.FailNow()
+	// }
+	inputFiles := make([]string, 0)
+	inputFiles = append(inputFiles, "../testdata/postman2.json")
+	schemas, err := generate.ReadInputFiles(inputFiles, true)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, err.Error())
+		os.Exit(1)
+	}
+
+	g := generate.New(schemas...)
+
+	err = g.CreateTypes()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Failure generating structs: ", err)
+		os.Exit(1)
+	}
+
+	var w io.Writer = os.Stdout
+	generate.Output(w, g, "arex")
+}
+
+func Test_GeneratePostmanCase(t *testing.T) {
+	val := exportAREXToPostman("", "")
+	fmt.Println(val)
 }
